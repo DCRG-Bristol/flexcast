@@ -35,14 +35,14 @@ if opts.Plot
 end
 
 % engine out ROC TO
-TW = 2*cast.ca.sg.ROC_VSR(WSx,obj,1.13,obj.CL_TOmax,2.4,cast.util.ft2m(0));
+TW = 2*cast.ca.sg.ROC_VSR(WSx,obj,1.13,obj.CL_TOmax,2.4,0);
 TWi_tmp = interp1(WSx,TW,WS_ldg,"linear");
 TWi = cast.util.tern(TWi<TWi_tmp,TWi_tmp,TWi);
 if opts.Plot
     plot(WSx,TW,"DisplayName",'Eng-Out ROC TO')
 end
 % engine out ROC Approach
-TW =2*cast.ca.sg.ROC_VSR(WSx,obj,1.4,obj.CL_max,2.1,cast.util.ft2m(0));
+TW =2*cast.ca.sg.ROC_VSR(WSx,obj,1.4,obj.CL_max,2.1,0);
 TWi_tmp = interp1(WSx,TW,WS_ldg,"linear");
 TWi = cast.util.tern(TWi<TWi_tmp,TWi_tmp,TWi);
 if opts.Plot

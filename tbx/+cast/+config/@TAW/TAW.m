@@ -99,44 +99,19 @@ classdef TAW < cast.ADP
             M_dg = obj.MTOM*obj.Mf_TOC*cast.SI.lb; % design mass (taking at M_TOC)
             M_ldg = obj.MTOM*obj.Mf_Ldg*cast.SI.lb;
             
-            % currently assuming entire fuslage volume pressurised ...
-            % mass of fuselage (Raymer 15.49)
-%             L_t = fuselage.EtaLength * (0.92 - obj.WingEta) * cast.SI.ft; % tail length MAC wing to MAC tail
-%             W_press = 11.9*(fuselage.Volume([0 (L_c + L_cp)/L_f])*cast.SI.ft^3*8)^0.271; % weight penalty for pressurisation
-%             m_f = 0.052*S_f^1.086*(1.5*2.5*M_dg)^0.177*L_t^-0.051*obj.LD_c^-0.072*(cast.SI.lbft*q_c)^0.241 + W_press;
-%             m_f = m_f./cast.SI.lb;
             % mass of fuselage Torenbeek (Torenbeek 8.3)
             m_f = (60*D_c^2*(L_f+1.5)+160*(1.5*2.5)^0.5*D_c*L_f)./9.81;
-            % mass of furnishings (Raymer 15.59)
-%             m_furn = (0.0582*M_dg - 65)./cast.SI.lb;
             % mass of furniture (Torenbeek 8.10)
             m_furn = (12*L_f*D_c*(3*D_c+0.5*1+1)+3500)./9.81*1.2; % 1.2 fudge factor
-            % mass of fuel system (Raymer 15.53) assuming: V_i = V_t, number of
-            % tanks is 2
-%             V_t = obj.MTOM*obj.Mf_Fuel/0.785/1e3*cast.SI.gal;
-%             m_fuelsys = (2.49*V_t^0.726*(0.5)^0.363*3^0.242*obj.N_eng^0.157)./cast.SI.lb;
             %fuel system mass Torenbeek(10.1007/s13272-022-00601-6 Eq. 8)
             V_t = obj.MTOM*obj.Mf_Fuel/0.785;
             N_fuelTank = 2;
             m_fuelsys = (36.3*(obj.N_eng+N_fuelTank-1)+4.366*N_fuelTank^0.5*V_t^(1/3));
 
-            % mass of hydraulics (Raymer 15.55)
-%             m_hyd = (0.12*(D_c*cast.SI.ft)^0.8*M_c^0.5)./cast.SI.lb;
             % mass Avionics (Raymer 15.57 (assuming 1000lb of avionics))
             m_av = 2.117*(2000)^0.933./cast.SI.lbf./9.81;
-            % mass of air-con / anti-ice system (Raymer 15.58)
-%             N_person = obj.ADR.PAX + obj.ADR.Crew;
-%             W_dg = obj.MTOM*obj.Mf_TOC*9.81*cast.SI.lbf;
-%             m_ice = 0.265*N_person^0.68*(m_av*9.81*cast.SI.lbf)^0.17*M_c^0.08;
-%             m_ice = m_ice./cast.SI.lbf./9.81;
-%             % mass of electrical systems (Raymer 15.56)
-%             m_elec = (12.57*((m_fuelsys+m_av).*cast.SI.lb)^0.51)./cast.SI.lb;
-%             % mass flight control systems (Raymer 15.54)
-%             m_control = 0.053*((fuselage.EtaLength-1.6*D_c) * cast.SI.ft)^1.536*(span*cast.SI.ft)^0.371*(1.5*2.5*M_dg*10^-4)^0.8;
-%             m_control = m_control ./ cast.SI.lb;
 
             % Systems Mass (Torenbeek 8.9)
-%             m_control = 0.64*(obj.MTOM*9.81.*cast.SI.lbf)^0.677./cast.SI.lb;
             m_sys = (270*L_f*D_c+150*L_f)/9.81*1.2;
 
             % operator Equipment (Torenbeek Table 8.1)
@@ -153,179 +128,32 @@ classdef TAW < cast.ADP
             obj.Masses.Control = m_sys;
             obj.Masses.OperatorItems = m_op;
 
-%             m_fuselage = m_f + m_furn + m_hyd + m_av + m_ice + m_elec + m_control + m_fuelsys + m_op;
             m_fuselage = m_f + m_furn + m_sys + m_fuelsys + m_op;
             fuselage.DistributeMass(m_fuselage,14,"tag","fus_OEM");
             fuselage.DistributeMass(obj.ADR.Payload,14,"tag","fus_Payload","isPayload",true,"Etas",[L_cp,L_c + L_cp]./L_f);
 
             %% create wings
-            Mstar = 0.935;
-            Cl_cruise = obj.MTOM*obj.Mf_TOC*9.81/(0.5*rho*(M_c*a)^2*obj.WingArea);
-            sweep_le = real(acosd(0.75.*Mstar./M_c));
-            tc_root = getThicknessToChord(M_c,Cl_cruise,sweep_le,Mstar);
-            tc_tip = tc_root - 0.03;
-            % set where wing joins fus 
-            D_join = sqrt((D_c/2)^2-(D_c/4)^2)*2;
-            S = @(x)wingArea(obj.WingArea,obj.AR,1/3,obj.KinkEta,x,sweep_le,0,D_join);
-            c = fminsearch(@(x)(S(x)-obj.WingArea).^2,obj.WingArea./sqrt(obj.WingArea*obj.AR));
-            [~,cs,LE_sweeps,TE_sweeps] = wingArea(obj.WingArea,obj.AR,1/3,obj.KinkEta,c,sweep_le,0,D_join);
-            %estimate mass (Raymer 15.46)
-            b = obj.Span*cast.SI.ft;
-            Sw = obj.WingArea.*cast.SI.ft^2;
-            n_z = 1.5*2.5;
-%             m_wing = 0.036*Sw^0.758*(obj.AR/cosd(sweep_le)^2)^0.6*(cast.SI.lbft*q_c)^0.006*...
-%                 (cs(end)/cs(end-1))^0.04*(100*(tc_root-0.015)/cosd(sweep_le))^-0.3*...
-%                 (1.5*2.5*M_dg)^0.49;
-%             m_wing = m_wing./cast.SI.lb;            
-            % Cessna Equation (Snorri 6-43)
-%             m_wing2 = 0.04674*(1.5*2.5*M_dg)^0.397*Sw^0.360*obj.AR^1.712;
-%             m_wing2 = m_wing2./cast.SI.lb;
-            % wing mass Torenbeek (Eq. 8.1 assume eta_cp = 0.65...)
-            m_wing = 0.0013*n_z*sqrt(obj.MTOM^2*obj.Mf_Ldg*cast.SI.lb)*0.75*b/328*obj.AR/((tc_root-0.015)*cosd(sweep_le)^2)+Sw*4.4;
-            m_wing = m_wing./cast.SI.lb;
+            % get common properties
 
-            obj.Masses.Wings = m_wing;
-            %% Wing RHS
-            etas = [0 (obj.KinkEta*obj.Span-D_join)/(obj.Span-D_join) 1];
-            etas = [0 (etas*(obj.Span-D_join)/2 + D_join/2)/(obj.Span/2)];
-            tr = interp1([0 1],[tc_root,tc_tip],etas,"linear");
-            Wing = baff.Wing.FromLETESweep(obj.Span/2,cs(1),etas,[0,LE_sweeps],[0,TE_sweeps],0.4,...
-                baff.Material.Stiff,"ThicknessRatio",[tr(1),tr],"Dihedral",[0 -1 -1]*obj.Dihedral);
-            Wing.A = baff.util.rotz(90)*baff.util.rotx(180);
-            Wing.Eta = obj.WingEta;
-            Wing.Offset = [0;0;-D_c/4];
-            Wing.Name = "Wing_RHS";
-            Wing.DistributeMass(m_wing/2,10,"Method","ByVolume","tag","wing_mass_RHS");
-            %make wing contribute to Drag
-            Wing = cast.drag.DraggableWing(Wing);
-            fuselage.add(Wing);
-            %add fuel mass
-            FuelVol = Wing.AeroStations(2:end).GetNormVolume([0.15 0.65])*Wing.EtaLength;
-            FuelMassTotal = 0.89*FuelVol.*cast.SI.litre.*0.785;
-            Wing.DistributeMass(FuelMassTotal,10,"Method","ByVolume","tag","wing_fuel_RHS","isFuel",true,"Etas",[Wing.AeroStations(2).Eta,Wing.AeroStations(end).Eta]);
+            [Wing_RHS,fuelCap_RHS] = obj.BuildWing(true,D_c);
+            fuselage.add(Wing_RHS);
+            [Wing_LHS,fuelCap_LHS,L_ldg,obj.Masses] = obj.BuildWing(false,D_c);
+            for i = 1:length(Wing_LHS.Stations)
+                Wing_LHS.Stations(i).EtaDir(1) = -Wing_LHS.Stations(i).EtaDir(1); 
+            end
+            fuselage.add(Wing_LHS);
+      
             % if not enough capaicty in wings add a fuel tank in fuselage
-            if FuelMassTotal*2<(obj.MTOM*obj.Mf_Fuel)
-                fus_fuel = baff.Fuel((obj.MTOM*obj.Mf_Fuel - FuelMassTotal*2),"eta",0,"Name",'Fuselage Fuel Tank');
-                Wing.add(fus_fuel);
+            if (fuelCap_RHS + fuelCap_LHS)<(obj.MTOM*obj.Mf_Fuel)
+                fus_fuel = baff.Fuel((obj.MTOM*obj.Mf_Fuel - (fuelCap_RHS + fuelCap_LHS)*2),"eta",obj.WingEta,"Name",'Fuselage Fuel Tank');
+                fus_fuel.Offset = [0;0;-D_c/4];
+                fuselage.add(fus_fuel);
             end
-
-            % add winglet
-            if obj.WingletHeight>0
-                h = obj.WingletHeight;
-                cr = Wing.AeroStations(end).Chord;
-                taper = Wing.AeroStations(end).Chord/Wing.AeroStations(end-1).Chord;
-                LE_sweep = LE_sweeps(end);
-                c_bar = tand(LE_sweep)*h+cr*taper-cr;
-                te_sweep = sign(c_bar)*atand(abs(c_bar)/h);
-                Winglet = baff.Wing.FromLETESweep(h,cr,[0 1],LE_sweep,te_sweep,0.4,...
-                baff.Material.Stiff,"ThicknessRatio",[1 1]*tr(end));
-                Winglet.A = baff.util.roty(90);
-                Winglet.Eta = 1;
-                Winglet = cast.drag.DraggableWing(Winglet);
-                Wing.add(Winglet);
-            end
-
-            % rubberise engine to get required thrust
-            obj.Engine = obj.Engine.Rubberise(obj.Thrust/obj.N_eng);
-
-            % engine insatllation mass (Raymer 15.52)
-            m_engi = (2.575*(obj.Engine.Mass*cast.SI.lb)^0.922)./cast.SI.lb - obj.Engine.Mass;
-            m_nac = 0.065*obj.Engine.T_Static/9.81; % Snorri 6-75
-            obj.Masses.Engine = (obj.Engine.Mass+m_nac)*2;
-            obj.Masses.EnginePylon = m_engi*2;
-            engine_mat = baff.Material.Stiff;
-            eta = [0 0.6 1];
-            radius = [1 1 1/1.4]*obj.Engine.Diameter/2;
-            engine = baff.BluffBody.FromEta(obj.Engine.Length,eta,radius,"Material",engine_mat,"NStations",4);
-            engine.A = baff.util.rotz(-90);
-            engine.Eta = obj.EngineEta;
-            engine.Offset = [0;obj.Engine.Length;obj.Engine.Diameter/2+0.1];
-            engine.Name = "engine_RHS";
-            %make engine contribute to Drag
-            engine = cast.drag.DraggableBluffBody(engine);
-            engine.InterferanceFactor = 1.25; % Raymer section 12.5.5
-            %add to wing
-            Wing.add(engine);
-            % add mass to engine 
-            eng_mass = baff.Mass(obj.Engine.Mass+m_nac,"eta",0.4,"Name","engine_mass_RHS");
-            pylon_mass = baff.Mass(m_engi,"eta",0.8,"Name","engine_installation_mass_RHS");
-            engine.add(eng_mass);
-            engine.add(pylon_mass);
-            
-            % add main landing gear
-            l_offset = 0.2;
-            z_e = abs(engine.Offset(3)) + obj.Engine.Diameter/2 + tand(5)*(obj.EngineEta*span/2 - D_c*l_offset);
-            L_ldg = sind(85)/sind(50)*z_e/sqrt(2);
-            Eta_ldg = (L_ldg + D_c*l_offset)/Wing.EtaLength;
-            m_ldg = 0.095*(1*1.5*M_ldg)^0.768*(L_ldg*cast.SI.ft)^0.409;
-            m_ldg = m_ldg ./ cast.SI.lb;
-            ldg = baff.Mass(m_ldg,"eta",Eta_ldg,"Name","ldg_main_RHS");
-            st = Wing.AeroStations.interpolate(Eta_ldg);
-            ldg.Offset = [0;-((st.Chord-1)-st.Chord*st.BeamLoc);L_ldg];
-            Wing.add(ldg);
-            obj.Masses.LandingGear = m_ldg*2;
-
-            %% Wing LHS
-            Wing = baff.Wing.FromLETESweep(obj.Span/2,cs(1),etas,[0,LE_sweeps],[0,TE_sweeps],0.4,...
-                baff.Material.Stiff,"ThicknessRatio",[tr(1),tr],"Dihedral",[0 -1 -1]*obj.Dihedral);
-            Wing.A = baff.util.rotz(90)*baff.util.rotx(180);
-            Wing.Eta = obj.WingEta;
-            Wing.Offset = [0;0;-D_c/4];
-            Wing.Name = "Wing_LHS";
-            Wing.DistributeMass(m_wing/2,10,"Method","ByVolume","tag","wing_mass_LHS");
-            for i = 1:length(Wing.Stations)
-                Wing.Stations(i).EtaDir(1) = -Wing.Stations(i).EtaDir(1); 
-            end
-            %make wing contribute to Drag
-            Wing = cast.drag.DraggableWing(Wing);
-            fuselage.add(Wing);
-            %add fuel mass
-            FuelVol = Wing.AeroStations(2:end).GetNormVolume([0.15 0.65])*Wing.EtaLength;
-            FuelMassTotal = 0.89*FuelVol.*cast.SI.litre.*0.785; % 90% filling from Raymer (integral tank)
-            Wing.DistributeMass(FuelMassTotal,10,"Method","ByVolume","tag","wing_fuel_LHS","isFuel",true,"Etas",[Wing.AeroStations(2).Eta,Wing.AeroStations(end).Eta]);
-
-%             add winglet
-            if obj.WingletHeight>0
-                h = obj.WingletHeight;
-                cr = Wing.AeroStations(end).Chord;
-                taper = Wing.AeroStations(end).Chord/Wing.AeroStations(end-1).Chord;
-                LE_sweep = LE_sweeps(end);
-                c_bar = tand(LE_sweep)*h+cr*taper-cr;
-                te_sweep = sign(c_bar)*atand(abs(c_bar)/h);
-                Winglet = baff.Wing.FromLETESweep(h,cr,[0 1],LE_sweep,te_sweep,0.4,...
-                baff.Material.Stiff,"ThicknessRatio",[1 1]*tr(end));
-                Winglet.A = baff.util.roty(90);
-                Winglet.Eta = 1;
-                Winglet = cast.drag.DraggableWing(Winglet);
-                Wing.add(Winglet);
-            end
-
-            % create engine
-            engine_mat = baff.Material.Stiff;
-            eta = [0 0.6 1];
-            radius = [1 1 1/1.4]*obj.Engine.Diameter/2;
-            engine = baff.BluffBody.FromEta(obj.Engine.Length,eta,radius,"Material",engine_mat,"NStations",4);
-            engine.A = baff.util.rotz(-90);
-            engine.Eta = obj.EngineEta;
-            engine.Offset = [0;obj.Engine.Length;obj.Engine.Diameter/2+0.1];
-            engine.Name = "engine_LHS";
-            %make engine contribute to Drag
-            engine = cast.drag.DraggableBluffBody(engine);
-            engine.InterferanceFactor = 1.3;
-            Wing.add(engine);
-            % add mass to engine 
-            eng_mass = baff.Mass(obj.Engine.Mass+m_nac,"eta",0.4,"Name","engine_mass_LHS");
-            pylon_mass = baff.Mass(m_engi,"eta",0.8,"Name","engine_installation_mass_LHS");
-            engine.add(eng_mass);
-            engine.add(pylon_mass);
-            % add main landing gear
-            ldg = baff.Mass(m_ldg,"eta",Eta_ldg,"Name","ldg_main_LHS");
-            st = Wing.AeroStations.interpolate(Eta_ldg);
-            ldg.Offset = [0;-((st.Chord-1)-st.Chord*st.BeamLoc);L_ldg];
-            Wing.add(ldg);
-            [mgc,eta_mgc]= Wing.AeroStations.GetMGC();
-            X_mgc = Wing.GetGlobalPos(eta_mgc,Wing.AeroStations.GetPos(0,0.25));
+           
+            [mgc,eta_mgc]= Wing_LHS.AeroStations.GetMGC();
+            X_mgc = Wing_LHS.GetGlobalPos(eta_mgc,Wing_LHS.AeroStations.GetPos(0,0.25));
             X_mgc(2) = 0;
+
             %% add nose landing gear
             L_ldg_nose = L_ldg -D_c/4 + D_c*0.1;
             m_ldg = 0.125*(1*1.5*M_ldg)^0.566*(L_ldg_nose*cast.SI.ft)^0.845;
@@ -336,6 +164,12 @@ classdef TAW < cast.ADP
             obj.Masses.LandingGear = obj.Masses.LandingGear + m_ldg;
 
             %% add HTP
+            Mstar = 0.935;
+            Cl_cruise = obj.MTOM*obj.Mf_TOC*9.81/(0.5*rho*(M_c*a)^2*obj.WingArea);
+            sweep_le = real(acosd(0.75.*Mstar./M_c));
+            tc_root = getThicknessToChord(M_c,Cl_cruise,sweep_le,Mstar);
+            tc_tip = tc_root - 0.03;
+
             l_HT = fuselage.EtaLength*0.92 - abs(X_mgc(1));
             S_HT = obj.WingArea*mgc*obj.V_HT/l_HT;
             AR = 5.5;
@@ -410,28 +244,41 @@ classdef TAW < cast.ADP
             obj.Baff = model;
 
             %% adjust wing position to have CoM at 30% of MAC
-            function delta = AdjustCoM(x,model)
-                model.Wing([model.Wing.Name]=="Wing_RHS").Eta = x;
-                model.Wing([model.Wing.Name]=="Wing_LHS").Eta = x;
-                CoM = model.GetCoM;
-                [~,x_mgc] = model.Wing(1).GetMGC(0.3);
-                delta = CoM(1)-x_mgc(1);
-            end
-            eta_pos = fminsearch(@(x)AdjustCoM(x,model)^2,obj.WingEta);
+            % get overall CoM
+            [CoM,m] = model.GetCoM;
+            % get wing com
+            wing_r = model.Wing([model.Wing.Name]=="Wing_RHS");
+            [CoM_rhs,m_rhs] = wing_r.GetCoM;
+            CoM_rhs =  fuselage.GetPos(wing_r.Eta) + wing_r.Offset + wing_r.A'*CoM_rhs;
+            wing_l = model.Wing([model.Wing.Name]=="Wing_LHS");
+            [CoM_lhs,m_lhs] = wing_l.GetCoM;
+            CoM_lhs = fuselage.GetPos(wing_l.Eta) + wing_l.Offset + wing_l.A'*CoM_lhs;
+            m_w = m_rhs + m_lhs;
+            CoM_w = (CoM_lhs.*m_lhs + CoM_rhs.*m_rhs)./m_w;
+            [~,xr_mgc] = wing_r.GetMGC(0.3);
+            [~,xl_mgc] = wing_l.GetMGC(0.3);
+            x_mgc = (xr_mgc + xl_mgc)/2;
+
+            m_f = m-m_w;
+            CoM_f = (CoM*m-CoM_w*m_w)/m_f;
+            x_f = CoM_f(1);
+            x_w = CoM_w(1);
+            delta = x_mgc(1)-x_w;
+            x_w = x_f - delta - m_w/m_f*delta;
+            delta_wing = CoM_w(1) - x_w;
+            delta_eta = delta_wing./fuselage.EtaLength;
+
+            eta = model.Wing([model.Wing.Name]=="Wing_RHS").Eta;
+            model.Wing([model.Wing.Name]=="Wing_RHS").Eta = eta+delta_eta;
+            model.Wing([model.Wing.Name]=="Wing_LHS").Eta = eta+delta_eta;
         end
     end
-end
-
-function sweep = getSweepAngle(M,Mstar)
-%equation 10.50 in torenbeck
-    sweep = real(acosd(0.75.*Mstar./M));
 end
 
 function tc = getThicknessToChord(M,Cl_cruise,sweep,Mstar)
 % equation 10.49 in Torenbeck;
     tc = cosd(sweep).*(Mstar - 0.1*(1.1.*Cl_cruise./cosd(sweep)^2).^1.5 - M.*cosd(sweep));
 end
-
 
 function [S,cs,le_sweep,te_sweep] = wingArea(S,AR,lambda,k,c,Lambda_LE,Lambda_TE,D_f)
     b = sqrt(AR*S)/2;

@@ -37,7 +37,7 @@ itr = 1;
 for i = 1:20
     fprintf('iteration %.0f: MTOM %.0f kg\n',i,ADP.MTOM);
     % constraint analysis
-    [ADP,TWi,WS_ldg] = ADP.ConstraintAnalysis();
+    [ADP,TWi,WS_ldg] = ADP.ConstraintAnalysis("Plot",false);
     % create geometry
     ADP = ADP.BuildBaff();
     % update paramters
@@ -96,9 +96,5 @@ num2clip(res');
 ax = gca;
 ax.FontSize = 10;
 title('A320')
-copygraphics(gcf);
-
-
-save('a320_ref.mat','ADP')
 
 
