@@ -11,7 +11,11 @@ classdef Mission
         end
     end
     methods(Static)
-        function obj = StandardWithAlternate(ADR)
+        function obj = StandardWithAlternate(ADR,Range)
+            arguments
+                ADR
+                Range = ADR.Range;
+            end
             FL015 = 1500./cast.SI.ft;
             CR015 = 1500./cast.SI.ft.*cast.SI.min; % climb rate of 1500ft/min in SI;
             % approach data
@@ -23,7 +27,7 @@ classdef Mission
             obj.Segments(2) = cast.mission.Climb(0,ADR.Alt_cruise,CR015);
             %estimate distance travelled whilst climbing
             r = obj.Segments(2).distanceEstimate(ADR.M_c);
-            obj.Segments(3) = cast.mission.Cruise(ADR.Alt_cruise,ADR.Range-2*r,ADR.M_c);
+            obj.Segments(3) = cast.mission.Cruise(ADR.Alt_cruise,Range-2*r,ADR.M_c);
             obj.Segments(4) = cast.mission.Decent(ADR.Alt_cruise,FL015,CR015);
             obj.Segments(5) = cast.mission.Loiter(ADR.Alt_cruise,10./cast.SI.min,ADR.V_app/a_a); % land + contingency fuel
             obj.Segments(6) = cast.mission.Climb(FL015,ADR.Alt_alternate,CR015);

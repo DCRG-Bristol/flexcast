@@ -9,11 +9,9 @@ switch Method
     case "Obert"
         Q = 1.05;
         P = 0.007;
-        KeM = 1;
     case "Schaufele"
         Q = 1.03;
         P = 0.38*obj.CD0;
-        KeM = 1;
     case "NitaCompressible"
         [~,Q,P,KeM] = obj.NitaOswald(Mach);
     case "Nita"

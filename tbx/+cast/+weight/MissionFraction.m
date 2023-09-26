@@ -1,7 +1,9 @@
-function [EWF,fs] = MissionFraction(Segments,ADP)
+function [EWF,fs] = MissionFraction(Segments,ADP,opts)
 arguments
     Segments cast.mission.Segment
     ADP cast.ADP
+    opts.M_TO = ADP.MTOM;
+    opts.OverideLD = false;
 end
 EWF = 1;   % empty weight fraction
 fs = zeros(1,length(Segments));
@@ -17,12 +19,26 @@ for i = 1:length(Segments)
             f = 1 - ADP.Engine.SFC_TO*9.81*(s.TaxiTime*ADP.TW_idle + s.TakeOffTime*TW);  % Snorri Eq. 6-32 (p.155)
         case 'cast.mission.Climb'
             deltaH = s.EndAlt-s.StartAlt;
-            [~,a] = cast.util.atmos(s.StartAlt+deltaH/2);
+            [rho,a] = cast.util.atmos(s.StartAlt+deltaH/2);
+            if opts.OverideLD
+                CL_c = EWF*opts.M_TO*9.81/(1/2*rho*(a*ADP.ADR.M_c)^2*ADP.WingArea);
+                CD_c = ADP.CD0 + CL_c^2/(pi*ADP.AR*ADP.e);
+                LD_c = CL_c/CD_c;
+            else
+                LD_c = ADP.LD_c;
+            end
             TW = 1/(ADP.LD_c)+s.ROC/(ADP.ADR.M_c*a);
             f = 1 - deltaH*ADP.Engine.SFC_cruise*9.81*TW/s.ROC;              % Snorri Eq. 6-34 (p. 155)
         case 'cast.mission.Cruise'
-            [~,a] = cast.util.atmos(s.StartAlt);
-            f = exp(-s.Range*9.81*ADP.Engine.SFC_cruise/(s.Mach*a*ADP.LD_c));        % Rearranged Brequet
+            [rho,a] = cast.util.atmos(s.StartAlt);
+            if opts.OverideLD
+                CL_c = EWF*opts.M_TO*9.81/(1/2*rho*(a*s.Mach)^2*ADP.WingArea);
+                CD_c = ADP.CD0 + CL_c^2/(pi*ADP.AR*ADP.e);
+                LD_c = CL_c/CD_c;
+            else
+                LD_c = ADP.LD_c;
+            end
+            f = exp(-s.Range*9.81*ADP.Engine.SFC_cruise/(s.Mach*a*LD_c));        % Rearranged Brequet
         case 'cast.mission.Decent'
             deltaH = s.StartAlt-s.EndAlt;
             TW = ADP.TW_idle; % assume idle power

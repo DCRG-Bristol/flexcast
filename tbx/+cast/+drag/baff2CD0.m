@@ -1,4 +1,4 @@
-function [CD0] = baff2CD0(model,S_ref,alt,Mach,opts)
+function [CD0,meta] = baff2CD0(model,S_ref,alt,Mach,opts)
 arguments
     model
     S_ref
@@ -8,15 +8,15 @@ arguments
     opts.pLamWing = 0.1;
     opts.pWingMaxThickness = 0.5;
 end
-CD0 = 0;
+meta = cast.drag.DragMeta.empty;
 for i = 1:length(model.Orphans)
-    CD0 = CD0 + element2CD0(model.Orphans(i),S_ref,alt,Mach,'pLamFuselage',opts.pLamFuselage,...
-        'pLamWing',opts.pLamWing,'pWingMaxThickness',opts.pWingMaxThickness);
+    meta = [meta,element2CD0(model.Orphans(i),S_ref,alt,Mach,'pLamFuselage',opts.pLamFuselage,...
+        'pLamWing',opts.pLamWing,'pWingMaxThickness',opts.pWingMaxThickness)];
+end
+CD0 = sum([meta.CD0]);
 end
 
-end
-
-function [CD0] = element2CD0(ele,S_ref,alt,Mach,opts)
+function [meta] = element2CD0(ele,S_ref,alt,Mach,opts)
 arguments
     ele
     S_ref
@@ -42,6 +42,7 @@ switch class(ele)
             FF = 1 + 0.35/f;    % Raymer 12.32
         end
         CD0 = Cf*FF*Q*ele.WettedArea/S_ref;
+        meta = cast.drag.DragMeta(ele.Name,CD0);
     case 'cast.drag.DraggableWing'
         [cLens,trs] = ele.AeroStations.GetMGCs;
         R = rho*Mach*a.*cLens./nu;
@@ -56,12 +57,13 @@ switch class(ele)
         Q = ele.InterferanceFactor;
         S_wet = ele.AeroStations.GetNormWettedAreas().*ele.EtaLength;
         CD0 = sum(Cf.*FF.*Q.*S_wet./S_ref);
+        meta = cast.drag.DragMeta(ele.Name,CD0);
     otherwise
-        CD0 = 0;
+        meta = [];
 end
 for i = 1:length(ele.Children)
-    CD0 = CD0 + element2CD0(ele.Children(i),S_ref,alt,Mach,'pLamFuselage',opts.pLamFuselage,...
-        'pLamWing',opts.pLamWing,'pWingMaxThickness',opts.pWingMaxThickness);
+    meta = [meta, element2CD0(ele.Children(i),S_ref,alt,Mach,'pLamFuselage',opts.pLamFuselage,...
+        'pLamWing',opts.pLamWing,'pWingMaxThickness',opts.pWingMaxThickness)];
 end
 end
 

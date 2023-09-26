@@ -1,4 +1,11 @@
-function [Wing,FuelMassTotal,L_ldg,Masses] = BuildWing(obj,isRight,D_c)
+function [Wing,FuelMassTotal,L_ldg,Masses] = BuildWing(obj,isRight,D_c,HasFuel,opts)
+arguments
+    obj
+    isRight
+    D_c
+    HasFuel = true;
+    opts.Mass_factor = 1;
+end
 %BUILDWING Summary of this function goes here
 %   Detailed explanation goes here
 if isRight
@@ -45,15 +52,18 @@ Sw = obj.WingArea.*cast.SI.ft^2;
 n_z = 1.5*2.5;
 % wing mass Torenbeek (Eq. 8.1 assume eta_cp = 0.65...)
 m_wing = 0.0013*n_z*sqrt(obj.MTOM^2*obj.Mf_Ldg*cast.SI.lb)*0.75*b/328*obj.AR/((tc_root-0.015)*cosd(sweep_le)^2)+Sw*4.4;
-m_wing = m_wing./cast.SI.lb;
+m_wing = m_wing./cast.SI.lb*opts.Mass_factor;
 obj.Masses.Wings = m_wing;
 Wing.DistributeMass(m_wing/2,10,"Method","ByVolume","tag",string(['wing_mass',Tag]));
 
 %% fuel volume
-FuelVol = Wing.AeroStations(2:end).GetNormVolume([0.15 0.65])*Wing.EtaLength;
-FuelMassTotal = 0.89*FuelVol.*cast.SI.litre.*0.785;
-Wing.DistributeMass(FuelMassTotal,10,"Method","ByVolume","tag",string(['wing_fuel',Tag]),"isFuel",true,"Etas",[Wing.AeroStations(2).Eta,Wing.AeroStations(end).Eta]);
-            
+if HasFuel
+    FuelVol = Wing.AeroStations(2:end).GetNormVolume([0.15 0.65])*Wing.EtaLength;
+    FuelMassTotal = 0.89*FuelVol.*cast.SI.litre.*0.785;
+    Wing.DistributeMass(FuelMassTotal,10,"Method","ByVolume","tag",string(['wing_fuel',Tag]),"isFuel",true,"Etas",[Wing.AeroStations(2).Eta,Wing.AeroStations(end).Eta]);
+else
+    FuelMassTotal = 0;
+end           
 %% Winglet
 if obj.WingletHeight>0
     h = obj.WingletHeight;
@@ -67,6 +77,7 @@ if obj.WingletHeight>0
     Winglet.A = baff.util.roty(90);
     Winglet.Eta = 1;
     Winglet = cast.drag.DraggableWing(Winglet);
+    Winglet.Name = string(['winglet',Tag]);
     Wing.add(Winglet);
 end
 

@@ -66,8 +66,19 @@ ax = gca;
 ax.Clipping = false;
 % ax.ZAxis.Direction = "reverse";
 axis equal
+[ADP.Baff.Fuel.FillingLevel] = deal(1);
+[ADP.Baff.Payload.FillingLevel] = deal(1);
 X = ADP.Baff.GetCoM();
 plot3(X(1),0,X(3),'sk','MarkerFaceColor','k','DisplayName','CoM');
+[ADP.Baff.Fuel.FillingLevel] = deal(0);
+[ADP.Baff.Payload.FillingLevel] = deal(0);
+X = ADP.Baff.GetCoM();
+plot3(X(1),0,X(3),'sk','MarkerFaceColor','w','DisplayName','CoM (OEM)');
+
+[X,Xw,~,mac] = ADP.GetNeutralPoint();
+plot3(X(1),0,X(3),'dg','MarkerFaceColor','g','DisplayName','NP');
+plot3(Xw(1),0,Xw(3),'dg','MarkerFaceColor','w','DisplayName','MAC (wing)');
+plot3([X(1)+mac*0.05,X(1)+mac*0.2],[0,0],[1,1]*X(3),'-og','MarkerFaceColor','w','DisplayName','5 to 20\% Stability Margin');
 
 %% plot payload range diagram
 f = figure(7);

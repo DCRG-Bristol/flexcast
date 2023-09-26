@@ -41,7 +41,7 @@ classdef ADR
             obj.GroundRunLanding = 1500; %m
             obj.M_c = 0.78;
             obj.Alt_max = 39e3./cast.SI.ft; %m (39,000ft)
-            obj.Alt_cruise = 32e3./cast.SI.ft;
+            obj.Alt_cruise = 31e3./cast.SI.ft;
             obj.Crew = 2 + ceil(PAX/50);
             if ~isnan(TargetPayload)
                 obj.Payload = TargetPayload;

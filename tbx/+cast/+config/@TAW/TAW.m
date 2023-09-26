@@ -7,6 +7,11 @@ classdef TAW < cast.ADP
         Masses = struct();
         Dihedral = 5;
         Engine = cast.config.Engine.CFM_LEAP_1A;
+        SpecificEnergy = 43.2;
+        CostPerKilo = 1.009;
+        TrappedFuel = 0;
+
+        CD0_meta = cast.drag.DragMeta.empty();
     end
     
     methods
@@ -34,9 +39,58 @@ classdef TAW < cast.ADP
             m(20) = obj.Masses.OperatorItems;
             num2clip(m');
         end
+        function meta = ToMeta(obj)
+            [r,p] = obj.PR_diagram();
+            %estimate design fuel
+            mission = cast.Mission.StandardWithAlternate(obj.ADR);
+            M_to = 0;
+            M_f = obj.MTOM-obj.ADR.Payload-obj.OEM;
+            while abs(M_to-(obj.OEM+obj.ADR.Payload+M_f))>10
+                M_to = obj.OEM+obj.ADR.Payload+M_f;
+                [EWF,fs] = cast.weight.MissionFraction(mission.Segments,obj,M_TO=M_to,OverideLD=true);
+                M_f =  (1-EWF)/(EWF)*(obj.OEM+obj.ADR.Payload);
+            end
+            M_Fuel_design = (1-prod(fs([1:5,end])))*M_to;
+            %create meta
+            meta = cast.Meta();
+            meta.PAX = obj.ADR.PAX;
+            meta.Crew = obj.ADR.Crew;
+            meta.Payload = obj.ADR.Payload;
+            meta.Payload_asym = p(3);
+            meta.Range_Design = obj.ADR.Range;
+            meta.Range_harm = r(2)./cast.SI.Nmile;
+            meta.Range_asym = r(3)./cast.SI.Nmile;
+            meta.Range_ferry = r(4)./cast.SI.Nmile;
+            meta.MTOM = obj.MTOM;
+            meta.MZFM = (obj.Baff.GetOEM + obj.ADR.Payload - obj.TrappedFuel);
+            meta.MFRES = obj.Mf_res .* obj.MTOM;
+            meta.MLND = obj.MTOM.*obj.Mf_Ldg;
+            meta.OEM = (obj.Baff.GetOEM - obj.TrappedFuel);
+            meta.Fuel_capacity = sum([obj.Baff.Fuel.Capacity]);
+            meta.FuelBurn_Design = M_Fuel_design;
+            meta.WingArea = obj.WingArea;
+            meta.Span = obj.Span;
+            meta.AspectRatio = obj.AR;
+            meta.Length = obj.Baff.BluffBody(1).EtaLength;
+            meta.FuselageRadius = max(arrayfun(@(x)x.Radius,[obj.Baff.BluffBody(1).Stations]));
+            meta.Thrust = obj.Thrust;
+            meta.SpecificEnergy = obj.SpecificEnergy;
+            meta.CostPerKilo = obj.CostPerKilo;
+            meta.M_c = obj.ADR.M_c;
+            meta.Alt_max = obj.ADR.Alt_max;
+            meta.Alt_cruise = obj.ADR.Alt_cruise;
+            meta.LD_c = obj.LD_c;
+            meta.CL_c = obj.CL_cruise;
+            meta.CD0 = obj.CD0;
+            meta.e = obj.e;
+        end
         function obj = TAW()
         end
-        function obj = BuildBaff(obj)
+        function obj = BuildBaff(obj,opts)
+            arguments
+                obj
+                opts.ExtraFuel = 0;
+            end
             %% calculate fuselage
             % get parameters
             obj.V_HT = 0.97;
@@ -145,10 +199,25 @@ classdef TAW < cast.ADP
       
             % if not enough capaicty in wings add a fuel tank in fuselage
             if (fuelCap_RHS + fuelCap_LHS)<(obj.MTOM*obj.Mf_Fuel)
-                fus_fuel = baff.Fuel((obj.MTOM*obj.Mf_Fuel - (fuelCap_RHS + fuelCap_LHS)*2),"eta",obj.WingEta,"Name",'Fuselage Fuel Tank');
+                fus_fuel_mass = obj.MTOM*obj.Mf_Fuel - (fuelCap_RHS + fuelCap_LHS) + opts.ExtraFuel;
+            else
+                fus_fuel_mass = opts.ExtraFuel;
+            end
+            if fus_fuel_mass>0
+                % add tank mass / change in fuel sys mass
+                N_fuelTank = 3;
+                f_mass = fuelCap_RHS + fuelCap_LHS + fus_fuel_mass;
+                delta_mass = (36.3*(obj.N_eng+N_fuelTank-1)+4.366*N_fuelTank^0.5*(f_mass/0.785)^(1/3)) - m_fuelsys;
+                f_tank = baff.Mass(delta_mass,"eta",5/fuselage.EtaLength,"Name","ldg_nose");
+                f_tank.Eta = obj.WingEta;
+                f_tank.Offset = [0;0;-D_c/4];
+                fuselage.add(f_tank);
+                % add fuel
+                fus_fuel = baff.Fuel(fus_fuel_mass,"eta",obj.WingEta,"Name",'Fuselage Fuel Tank');
                 fus_fuel.Offset = [0;0;-D_c/4];
                 fuselage.add(fus_fuel);
             end
+            
            
             [mgc,eta_mgc]= Wing_LHS.AeroStations.GetMGC();
             X_mgc = Wing_LHS.GetGlobalPos(eta_mgc,Wing_LHS.AeroStations.GetPos(0,0.25));
@@ -195,6 +264,7 @@ classdef TAW < cast.ADP
             HT_RHS.DistributeMass(m_HT/2,10,"Method","ByVolume","tag","HTP_mass");
             HT_RHS = cast.drag.DraggableWing(HT_RHS);
             HT_RHS.InterferanceFactor = 1.04;
+            HT_RHS.Name = 'HTP_RHS';
             fuselage.add(HT_RHS);
 
             HT_LHS = baff.Wing.FromLETESweep(b_HT/2,c_r,[0 1],sweep_le,sweep_te,0.25,...
@@ -208,6 +278,7 @@ classdef TAW < cast.ADP
             HT_LHS.DistributeMass(m_HT/2,10,"Method","ByVolume","tag","HTP_mass");
             HT_LHS = cast.drag.DraggableWing(HT_LHS);
             HT_LHS.InterferanceFactor = 1.04;
+            HT_LHS.Name = 'HTP_LHS';
             fuselage.add(HT_LHS);
 
             %% add VTP
@@ -235,6 +306,7 @@ classdef TAW < cast.ADP
             VT.DistributeMass(m_VT,10,"Method","ByVolume","tag","VTP_mass");
             VT = cast.drag.DraggableWing(VT);
             VT.InterferanceFactor = 1.04;
+            VT.Name = 'VTP';
             fuselage.add(VT);
 
             %% create model
@@ -242,35 +314,114 @@ classdef TAW < cast.ADP
             model.AddElement(fuselage);
             model.UpdateIdx();
             obj.Baff = model;
+            obj.OEM = model.GetOEM;
 
             %% adjust wing position to have CoM at 30% of MAC
-            % get overall CoM
+            obj.AdjustCoM(0.35);
+        end
+
+        function [X,X_w,X_h,mac] = GetNeutralPoint(obj)
+            model = obj.Baff;
+            % wing properites
+            wing_r = model.Wing([model.Wing.Name]=="Wing_RHS");
+            [mac,X_w] = wing_r.GetMGC(0.25);
+            X_w(2) = 0;
+            S_w = wing_r.PlanformArea()*2;
+            % htp properties
+            htp_r = model.Wing([model.Wing.Name]=="HTP_RHS");
+            [~,X_h] = htp_r.GetMGC(0.25);
+            X_h(2) = 0;
+            S_h = htp_r.PlanformArea()*2;
+            X = (X_w.*S_w + X_h.*S_h)./(S_w+S_h);
+        end
+
+        function AdjustCoM(obj,p)
+            % AdjustCoM adjust wing pos to get CoM at OEM at p % of MAC
+            model = obj.Baff;
+            
+            % get overall CoM (OEM)
+            [model.Payload.FillingLevel] = deal(0);
+            [model.Fuel.FillingLevel] = deal(0);
             [CoM,m] = model.GetCoM;
+            x_a = CoM(1);
             % get wing com
             wing_r = model.Wing([model.Wing.Name]=="Wing_RHS");
             [CoM_rhs,m_rhs] = wing_r.GetCoM;
-            CoM_rhs =  fuselage.GetPos(wing_r.Eta) + wing_r.Offset + wing_r.A'*CoM_rhs;
+            CoM_rhs =  wing_r.Parent.GetPos(wing_r.Eta) + wing_r.Offset + wing_r.A'*CoM_rhs;
             wing_l = model.Wing([model.Wing.Name]=="Wing_LHS");
             [CoM_lhs,m_lhs] = wing_l.GetCoM;
-            CoM_lhs = fuselage.GetPos(wing_l.Eta) + wing_l.Offset + wing_l.A'*CoM_lhs;
+            CoM_lhs = wing_l.Parent.GetPos(wing_l.Eta) + wing_l.Offset + wing_l.A'*CoM_lhs;
             m_w = m_rhs + m_lhs;
-            CoM_w = (CoM_lhs.*m_lhs + CoM_rhs.*m_rhs)./m_w;
-            [~,xr_mgc] = wing_r.GetMGC(0.3);
-            [~,xl_mgc] = wing_l.GetMGC(0.3);
-            x_mgc = (xr_mgc + xl_mgc)/2;
+            x_w = (CoM_lhs(1).*m_lhs + CoM_rhs(1).*m_rhs)./m_w;
+            % get wing MAC
+            [mac,xr_mgc] = wing_r.GetMGC(p);
+            delta_mac = xr_mgc(1) - x_w;
 
+
+            % get fuselage CoM (OEM minus wings)
             m_f = m-m_w;
-            CoM_f = (CoM*m-CoM_w*m_w)/m_f;
-            x_f = CoM_f(1);
-            x_w = CoM_w(1);
-            delta = x_mgc(1)-x_w;
-            x_w = x_f - delta - m_w/m_f*delta;
-            delta_wing = CoM_w(1) - x_w;
-            delta_eta = delta_wing./fuselage.EtaLength;
+            x_f = (x_a*m - x_w*m_w)/m_f;
+            x_w_new = (x_f*m_f/m -delta_mac)/(1-m_w/m);
+%             x_w_new = (x_mac_h*S_h*m + mac*m*S*factor - x_f*m_f*S + delta_mac*m_a*S_w)/(m_w*S-m*S_w);
 
-            eta = model.Wing([model.Wing.Name]=="Wing_RHS").Eta;
-            model.Wing([model.Wing.Name]=="Wing_RHS").Eta = eta+delta_eta;
-            model.Wing([model.Wing.Name]=="Wing_LHS").Eta = eta+delta_eta;
+            % adjust eta
+            delta_wing = x_w_new - x_w;
+            delta_eta = delta_wing./wing_r.Parent.EtaLength;
+            eta = wing_r.Eta - delta_eta;
+            % update wings
+            model.Wing([model.Wing.Name]=="Wing_RHS").Eta = eta;
+            model.Wing([model.Wing.Name]=="Wing_LHS").Eta = eta;
+            obj.Baff = model;
+        end
+
+
+        function AdjustCoM_NP(obj, p)
+            % AdjustCoM_NP adjust wing pos to get CoM at OEM at p % in
+            % front of NP
+            % THIS HAS A BUG - it assumes tail is as effective and wing...
+            model = obj.Baff;
+            % get overall CoM (OEM)
+            [model.Payload.FillingLevel] = deal(0);
+            [model.Fuel.FillingLevel] = deal(0);
+            [CoM,m] = model.GetCoM;
+            x_a = CoM(1);
+            % get wing com
+            wing_r = model.Wing([model.Wing.Name]=="Wing_RHS");
+            [CoM_rhs,m_rhs] = wing_r.GetCoM;
+            CoM_rhs =  wing_r.Parent.GetPos(wing_r.Eta) + wing_r.Offset + wing_r.A'*CoM_rhs;
+            wing_l = model.Wing([model.Wing.Name]=="Wing_LHS");
+            [CoM_lhs,m_lhs] = wing_l.GetCoM;
+            CoM_lhs = wing_l.Parent.GetPos(wing_l.Eta) + wing_l.Offset + wing_l.A'*CoM_lhs;
+            m_w = m_rhs + m_lhs;
+            x_w = (CoM_lhs(1).*m_lhs + CoM_rhs(1).*m_rhs)./m_w;
+            % get wing MAC
+            [mac,xr_mgc] = wing_r.GetMGC(0.25);
+            x_mac_w = xr_mgc(1);
+            S_w = wing_r.PlanformArea()*2;
+            delta_mac = x_mac_w - x_w;
+
+            % get HTP MAC
+            htp_r = model.Wing([model.Wing.Name]=="HTP_RHS");
+            [~,xr_mgc] = htp_r.GetMGC(0.25);
+            x_mac_h = xr_mgc(1);
+            S_h = htp_r.PlanformArea()*2;
+
+
+            % get fuselage CoM (OEM minus wings)
+            m_f = m-m_w;
+            x_f = (x_a*m - x_w*m_w)/m_f;
+            S = S_h+S_w;
+%             x_w_new = (x_mac_h*S_h*m + mac*m*S*factor - x_f*m_f*S - delta_mac*m_w*S)/(m_w*S-m*S_w);
+            x_w_new = (x_mac_h*S_h*m + mac*m*S*p - x_f*m_f*S + delta_mac*m*S_w)/(m_w*S-m*S_w);
+
+            % adjust eta
+            delta_wing = x_w_new - x_w;
+            delta_eta = delta_wing./wing_r.Parent.EtaLength;
+            eta = wing_r.Eta - delta_eta;
+            % update wings
+            model.Wing([model.Wing.Name]=="Wing_RHS").Eta = eta;
+            model.Wing([model.Wing.Name]=="Wing_LHS").Eta = eta;
+            obj.Baff = model;
         end
     end
 end

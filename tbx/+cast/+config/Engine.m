@@ -32,11 +32,14 @@ classdef Engine
     
     methods(Static)
         
-        function obj = CFM_LEAP_1A()
+        function obj = CFM_LEAP_1A(sfc_scaling)
+            arguments
+                 sfc_scaling = 1;
+            end
             %CFM_LEAP_1A SData for CFM LEAP-1A
             %   https://en.wikipedia.org/wiki/CFM_International_LEAP
             %   SFC_To is a guess
-            f = 1./(cast.SI.lb/(cast.SI.lbf*cast.SI.hr)); % to convert SFC from imperial to SI.
+            f = 1./(cast.SI.lb/(cast.SI.lbf*cast.SI.hr)) * sfc_scaling; % to convert SFC from imperial to SI.
             obj = cast.config.Engine(143.05e3,3.328,2.4,3153,0.3*f,0.515*f,11);
         end
         function obj = CFM56_5()

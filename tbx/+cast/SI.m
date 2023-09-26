@@ -20,6 +20,7 @@ classdef SI
     %mass
     properties(Constant)
         lb = 2.20462;
+        Tonne = 1/1e3;
     end
     %volume
     properties(Constant)
@@ -34,6 +35,10 @@ classdef SI
     properties(Constant)
         hr = 1/(60*60);
         min = 1/60;
+    end
+    %other
+    properties(Constant)
+        DragCount = 1e4;
     end
     methods
 %         function obj = SI(inputArg1,inputArg2)

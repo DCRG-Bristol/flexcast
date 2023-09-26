@@ -31,6 +31,7 @@ classdef ADP
         CL_TOmax        % max CL in TO condition
         CD_LDG = 0.04;  %CD in ground run on landing
         CL_LDG = 0;     %CL during ground run on landing
+        CL_cruise = 0.5;%CL during cruise
 
         LD_c = 15;
         LD_app = 10;
@@ -43,6 +44,7 @@ classdef ADP
     %mass
     properties
         MTOM
+        OEM
         Mf_Fuel % mass ratio fuel
         Mf_TOC % mass ratio top of climb
         Mf_Ldg % mass ratio at landing
