@@ -20,6 +20,6 @@ for i = 1:length(range)
         M_f(i) =  (1-EWF)/(EWF)*(obj.OEM+obj.ADR.Payload*payloadFactor);
     end
     M_Fuel_design = (1-prod(fs([1:5,end])))*M_to;
-    doc(i) = M_Fuel_design*obj.SpecificEnergy/(obj.ADR.PAX*payloadFactor)/(range(i)/1000);
+    doc(i) = M_Fuel_design*obj.FuelType.SpecificEnergy/(obj.ADR.PAX*payloadFactor)/(range(i)/1000);
 end
 end

@@ -1,7 +1,8 @@
-classdef ADP
+classdef ADP < handle
     %ADP Aircraft Design Parameters
     properties
         ADR cast.ADR; % Aircraft Design Requirements
+        FuelType = cast.config.Fuel.JA1;
     end
     %geometry
     properties

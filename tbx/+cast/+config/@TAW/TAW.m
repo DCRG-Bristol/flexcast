@@ -7,8 +7,6 @@ classdef TAW < cast.ADP
         Masses = struct();
         Dihedral = 5;
         Engine = cast.config.Engine.CFM_LEAP_1A;
-        SpecificEnergy = 43.2;
-        CostPerKilo = 1.009;
         TrappedFuel = 0;
 
         CD0_meta = cast.drag.DragMeta.empty();
@@ -74,8 +72,8 @@ classdef TAW < cast.ADP
             meta.Length = obj.Baff.BluffBody(1).EtaLength;
             meta.FuselageRadius = max(arrayfun(@(x)x.Radius,[obj.Baff.BluffBody(1).Stations]));
             meta.Thrust = obj.Thrust;
-            meta.SpecificEnergy = obj.SpecificEnergy;
-            meta.CostPerKilo = obj.CostPerKilo;
+            meta.SpecificEnergy = obj.FuelType.SpecificEnergy;
+            meta.CostPerKilo = obj.FuelType.CostPerKilo;
             meta.M_c = obj.ADR.M_c;
             meta.Alt_max = obj.ADR.Alt_max;
             meta.Alt_cruise = obj.ADR.Alt_cruise;
