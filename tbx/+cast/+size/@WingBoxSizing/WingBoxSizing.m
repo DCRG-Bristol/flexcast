@@ -34,10 +34,10 @@ classdef WingBoxSizing
     
     methods
         function val = eq(obj1,obj2)
-            if ~isa(obj2,'cast.size.WingBoxSizing')
+            if ~isa(obj2,class(obj1))
                 error('cannot compare %s to %s',class(obj1),class(obj2))
             end
-            val = 0;
+            val = inf;
             for i = 1:length(obj1)
                 % skin thickness delta
                 st_delta = (obj2(i).Skin.Skin_Thickness - obj1(i).Skin.Skin_Thickness);
@@ -60,11 +60,17 @@ classdef WingBoxSizing
                 Span double
                 Mat ads.fe.Material
                 opts.RibPitch double= 0.6;
+                opts.Etas double = [];
             end
             %WINGPARAMS Construct an instance of this class
             %   Detailed explanation goes here
+            if isempty(opts.Etas)
+                obj.Eta = linspace(0,1,NumEl);
+            else
+                obj.Eta = opts.Etas;
+                NumEl = length(obj.Eta);
+            end
             obj.NumEl = NumEl;
-            obj.Eta = linspace(0,1,obj.NumEl);
             obj.Span = Span;
             obj.Mat = Mat;
             %spar properties
@@ -79,12 +85,48 @@ classdef WingBoxSizing
             obj.Ribs = cast.size.RibParams(Span,opts.RibPitch);
 
             % skin-stringer panels 
-            obj.Skin = cast.size.SkinParams(NumEl);
+            obj.Skin = cast.size.SkinParams(nan,Span,Etas=obj.Eta);
         end
+
+        function new_obj = interpolate(obj,etas)
+            arguments
+                obj
+                etas double = [];
+            end
+            %INTERPOLATE Summary of this method goes here
+            %   Detailed explanation goes here
+            span = (etas(end)-etas(1))*obj.Span;
+            new_obj = cast.size.WingBoxSizing(nan,span,obj.Mat,'Etas',etas./etas(end),'RibPitch',obj.Ribs.IdealPitch);
+            new_obj.SparCap_Thickness = interp1(obj.Eta,obj.SparCap_Thickness,etas);
+            new_obj.SparWeb_Thickness = interp1(obj.Eta,obj.SparWeb_Thickness,etas);
+            new_obj.Width = interp1(obj.Eta,obj.Width,etas);
+            new_obj.Height = interp1(obj.Eta,obj.Height,etas);
+            psi = [0,(obj.Eta(2:end)+obj.Eta(1:end-1))/2,1];
+            new_obj.SparWeb_Stiff_N = ceil(interp1(psi,obj.SparWeb_Stiff_N([1,1:end,end]),(etas(2:end)+etas(1:end-1))/2));
+            new_obj.SparWeb_Stiff_Thickness = interp1(psi,obj.SparWeb_Stiff_Thickness([1,1:end,end]),(etas(2:end)+etas(1:end-1))/2);
+            new_obj.Ribs = obj.Ribs.interpolate(etas);
+            new_obj.Skin = obj.Skin.interpolate(etas);
+        end
+        function new_obj = combine(obj,obj2)
+            span = obj.Span + obj2.Span;
+            etas = obj.Eta*obj.Span/span;
+            etas = [etas obj2.Eta(2:end)*(obj2.Span/span)+obj.Span/span];
+            new_obj = cast.size.WingBoxSizing(nan,span,obj.Mat,'Etas',etas,'RibPitch',obj.Ribs.IdealPitch);
+            new_obj.SparCap_Thickness = [obj.SparCap_Thickness obj2.SparCap_Thickness(2:end)];
+            new_obj.SparWeb_Thickness = [obj.SparWeb_Thickness obj2.SparWeb_Thickness(2:end)];
+            new_obj.Width = [obj.Width obj2.Width(2:end)];
+            new_obj.Height = [obj.Height obj2.Height(2:end)];
+            new_obj.SparWeb_Stiff_N = [obj.SparWeb_Stiff_N obj2.SparWeb_Stiff_N];
+            new_obj.SparWeb_Stiff_Thickness = [obj.SparWeb_Stiff_Thickness obj2.SparWeb_Stiff_Thickness];
+
+            new_obj.Ribs = obj.Ribs.combine(obj2.Ribs);
+            new_obj.Skin = obj.Skin.combine(obj2.Skin);
+        end
+
     end
     methods
         function obj = plus(obj,obj2)
-            if ~isa(obj2(1),"cast.size.WingBoxSizing")
+            if ~isa(obj2(1),class(obj))
                 error('Must be two WingBoxSizing')
             end
             for i= 1:length(obj)
@@ -97,7 +139,7 @@ classdef WingBoxSizing
             end
         end
         function obj = minus(obj,obj2)
-            if ~isa(obj2(1),"cast.size.WingBoxSizing")
+            if ~isa(obj2(1),class(obj))
                 error('Must be two WingBoxSizing')
             end
             for i= 1:length(obj)

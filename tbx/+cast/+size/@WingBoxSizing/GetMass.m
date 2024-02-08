@@ -43,10 +43,9 @@ Mass(i).Strg=Volume_strg*obj(i).Mat.rho;
 %% Rib Mass
 w_rib = interp1(obj(i).Eta,obj(i).Width,obj(i).Ribs.Eta);
 h_rib = interp1(obj(i).Eta,obj(i).Height,obj(i).Ribs.Eta);
-Mass(i).RibTotal=sum(1.0*w_rib.*h_rib.*obj(i).Ribs.Thickness*obj(i).Mat.rho);
 Mass(i).Ribs=w_rib.*h_rib.*obj(i).Ribs.Thickness*obj(i).Mat.rho;
 Mass(i).Ribs = Mass(i).Ribs*1.5; % account for fact wingbox is only 66% of crosssection area
-
+Mass(i).RibTotal = sum(Mass(i).Ribs);
 %% Web stiffener Mass
 %assuming 1 inch r section
 Vol_stiff=(0.0254*2)*obj(i).SparWeb_Stiff_Thickness.*obj(i).Height(1:end-1);
@@ -55,7 +54,7 @@ Mass(i).Web_stiff_total=sum(total_vol_stiff*obj(i).Mat.rho);
 Mass(i).Web_stiff=total_vol_stiff*obj(i).Mat.rho;
 
 Mass(i).Total = Mass(i).Web_stiff_total + Mass(i).RibTotal + Mass(i).Wing;
-Mass(i).Fixtures = Mass(i).Total * 0.01;
+Mass(i).Fixtures = Mass(i).Total * 0.00;
 
 Mass(i).Total = Mass(i).Total + Mass(i).Fixtures;
 

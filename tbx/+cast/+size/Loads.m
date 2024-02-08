@@ -108,7 +108,7 @@ classdef Loads
             end
         end
         function obj = and(obj,obj2)
-            if ~isa(obj2,'cast.size.Loads')
+            if ~isa(obj2,class(obj))
                 error('Second object must be of type Loads')
             end
             for i = 1:length(obj)
@@ -154,7 +154,7 @@ classdef Loads
             obj.FzIdx = repmat(obj.FzIdx,n,1);
         end
         function obj = plus(obj,obj2)
-            if ~isa(obj2,'cast.size.Loads')
+            if ~isa(obj2,class(obj))
                 error('Second object must be of type Loads')
             end
             for i = 1:length(obj)
@@ -208,7 +208,7 @@ classdef Loads
             end
         end
         function obj = minus(obj,obj2)
-            if ~isa(obj2,'cast.size.Loads')
+            if ~isa(obj2,class(obj))
                 error('Second object must be of type Loads')
             end
             for i = 1:length(obj)

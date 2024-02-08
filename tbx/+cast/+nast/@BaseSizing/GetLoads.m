@@ -7,10 +7,10 @@ arguments
     CaseOpts.BinFolder = '';
     CaseOpts.Verbose = true;
 end
-fh.printing.title('Calculating Loads',Length=60);
+ads.util.printing.title('Calculating Loads',Length=60);
 for i = 1:length(Cases)
     if ~opts.Silent
-        fprintf('\t Running Case %s\n',Cases(i).Name);
+        ads.util.printing.title(sprintf('Running Case %s',Cases(i).Name),Length=60,Symbol='+');
     end
     cellArgs = namedargs2cell(Cases(i).ConfigParams);
     obj.SetConfiguration(cellArgs{:});

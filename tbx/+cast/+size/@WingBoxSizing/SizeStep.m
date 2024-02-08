@@ -25,7 +25,7 @@ tskn=Par.Skin.Skin_Thickness;   % spar skin thickness
 Cap_area_Y=0.5*My./(h*sigma_Y);
 
 Cap_Thickness_Y=Cap_area_Y./ws;
-Cap_Thickness_B=(4*My.*Par.Ribs.Pitch^2./(pi^2*Par.Mat.E*h.*ws)).^(1/3);
+Cap_Thickness_B=(4*My.*Par.Ribs.IdealPitch^2./(pi^2*Par.Mat.E*h.*ws)).^(1/3);
 Cap_Thickness=max([Cap_Thickness_Y;Cap_Thickness_B]);
 
 % Update cap thickness and beam properties
@@ -74,7 +74,7 @@ Iyy = Par.Iyy;
 %% skin-stringer panel sizing
 %effective length (inches)
 c=1.5;
-L_inch = convlength(Par.Ribs.Pitch/sqrt(c),'m','in'); 
+L_inch = convlength(Par.Ribs.IdealPitch/sqrt(c),'m','in'); 
 
 %bending stress (psi)
 sigma_psi=convpres(0.5*My.*h./Iyy,'pa','psi');
@@ -136,11 +136,11 @@ w_rib = interp1(Par.Eta,Par.Width,Par.Ribs.Eta);
 h_rib = interp1(Par.Eta,Par.Height,Par.Ribs.Eta);
 % factor 1.5 applied as the ratio between A_st/A_skn=0.5; Hence effective
 % thickness of the panel is taken as 1.5 times t_skin.
-te_rib = interp1(Par.Eta,Par.Skin.Skin_Thickness*1.5,Par.Ribs.Eta);
+te_rib = interp1(Par.Eta,Par.Skin.Skin_Thickness,Par.Ribs.Eta)*1.5;
 
 N_crush=My_rib./(h_rib.*w_rib);
 Sigma_Crush=2*N_crush.^2./(Par.Mat.E*te_rib.*h_rib);
-F_crush=Par.Ribs.Pitch*Sigma_Crush.*w_rib;
+F_crush=Par.Ribs.ActualPitch*Sigma_Crush.*w_rib;
 t_y=F_crush./(w_rib*Par.Mat.Yield); % critical thickness for yielding 
 A=pi^2*Par.Mat.E/12; % critical thickness for wide column buckling
 c=1;
@@ -159,7 +159,7 @@ Iu=N_Iu.*h(idx).*Par.SparWeb_Thickness(idx).^3;
 % to web) - assuming stringer length is 1 inch 
 t_stiff=3*Iu/0.0254^3;
 
-Par.SparWeb_Stiff_N =round(Seg_len./web_dc(idx));  % Number of stiffners in each shear panel. 
+Par.SparWeb_Stiff_N =Seg_len./web_dc(idx);  % Number of stiffners in each shear panel. 
 Par.SparWeb_Stiff_Thickness = t_stiff; % Set spar web stifferner thickness
 end
 

@@ -8,6 +8,7 @@ classdef BaseSizing < handle
         fe ads.fe.Component = ads.fe.Component.empty;
         WingBoxParams cast.size.WingBoxSizing = cast.size.WingBoxSizing.empty;
         Name = '';
+        RibPitch = 0.6;
     end
 
     properties(Abstract)
