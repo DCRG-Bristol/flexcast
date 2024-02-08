@@ -40,7 +40,7 @@ classdef Engine
             %   https://en.wikipedia.org/wiki/CFM_International_LEAP
             %   SFC_To is a guess
             f = 1./(cast.SI.lb/(cast.SI.lbf*cast.SI.hr)) * sfc_scaling; % to convert SFC from imperial to SI.
-            obj = cast.config.Engine(143.05e3,3.328,2.4,3153,0.3*f,0.515*f,11);
+            obj = cast.config.Engine(143.05e3*0.846,3.328,2.4,3153,0.3*f,0.515*f,11);
         end
         function obj = CFM56_5()
             %CFM56_5 Data for CFM56-5 as on a318/a319

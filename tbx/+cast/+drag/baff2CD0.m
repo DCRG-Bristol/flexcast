@@ -56,7 +56,13 @@ switch class(ele)
         FF = (1+0.6/cEta.*trs+100.*trs.^4).*(1.34*Mach^0.18.*cosd(sweeps).^0.28); % Raymer 12.30
         Q = ele.InterferanceFactor;
         S_wet = ele.AeroStations.GetNormWettedAreas().*ele.EtaLength;
-        CD0 = sum(Cf.*FF.*Q.*S_wet./S_ref);
+        if any(isnan(ele.EtaWet))
+            CD0 = sum(Cf.*FF.*Q.*S_wet./S_ref);
+        else
+            idx = [ele.AeroStations.Eta]>=ele.EtaWet(1) & [ele.AeroStations.Eta]<=ele.EtaWet(2);
+            idx = idx(2:end) & idx(1:end-1);
+            CD0 = sum(Cf(idx).*FF(idx).*Q.*S_wet(idx)./S_ref);
+        end
         meta = cast.drag.DragMeta(ele.Name,CD0);
     otherwise
         meta = [];

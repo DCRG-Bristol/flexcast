@@ -19,7 +19,7 @@ classdef ADR
     % alternate airport diversion properties
     properties
         Alt_alternate = 22e3./cast.SI.ft;
-        Range_alternate = 320./cast.SI.Nmile;
+        Range_alternate = 200./cast.SI.Nmile;
         Loiter = 30./cast.SI.min; % 30 minutes in seconds
     end
     

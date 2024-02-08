@@ -23,24 +23,24 @@ classdef ADP < handle
     properties
         Cl_max = 1.5;   % airfoil amx Cl for wing
         
-        Delta_Cl_ld = 1.3;
-        Delta_Cl_to = 0.4;
+        Delta_Cl_ld = 1.5;
+        Delta_Cl_to = 0.8;
 
         CL_max = 2;     %Max CL in landing configuration 
-        CD_TO = 0.04;   %CD in ground run
-        CL_TO = 0;      %CL during ground run        
-        CL_TOmax        % max CL in TO condition
-        CD_LDG = 0.04;  %CD in ground run on landing
-        CL_LDG = 0;     %CL during ground run on landing
+        CD_TO = 0.03;   %CD in ground run
+        CL_TO = 0.8;      %CL during ground run        
+        CL_TOmax =1.5;       % max CL in TO condition
+        CD_LDG = 0.03;  %CD in ground run on landing
+        CL_LDG = 0.8;     %CL during ground run on landing
         CL_cruise = 0.5;%CL during cruise
 
-        LD_c = 15;
+        LD_c = 16;
         LD_app = 10;
 
-        CD0;
-        e; %Oswald Efficency Factor
+        CD0 =0.02;
+        e = 0.8; %Oswald Efficency Factor
 
-        TWgr; %thrust to weight ratio on ground run 
+        TWgr =0; %thrust to weight ratio on ground run 
     end
     %mass
     properties
@@ -62,6 +62,10 @@ classdef ADP < handle
     
     methods
         function obj = ADP()
+        end
+        function newObj = Clone(obj)
+            objByteArray = getByteStreamFromArray(obj);
+            newObj = getArrayFromByteStream(objByteArray);
         end
     end
 end

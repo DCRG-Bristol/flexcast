@@ -78,7 +78,12 @@ if obj.WingletHeight>0
     Winglet.Eta = 1;
     Winglet = cast.drag.DraggableWing(Winglet);
     Winglet.Name = string(['winglet',Tag]);
+    %estimate mass (Torenbeck 11.70)
+    g = 9.81;
+    M_winglet = 2.5 * 56 * (obj.MTOM*g*obj.WingletHeight/(1e6*5))^0.145/g * Winglet.PlanformArea;
+    Winglet.DistributeMass(M_winglet,2,"Method","ByVolume","tag",string(['winglet_mass',Tag]));
     Wing.add(Winglet);
+    obj.Masses.WingletMass = M_winglet*2;
 end
 
 %% Engine

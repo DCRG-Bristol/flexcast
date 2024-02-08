@@ -1,6 +1,9 @@
 classdef DraggableWing < baff.Wing & cast.drag.Draggable
     %DRAGGABLEBLUFFBODY Summary of this class goes here
     %   Detailed explanation goes here  
+    properties
+        EtaWet = [nan nan];
+    end
     methods
         function obj = DraggableWing(Wing)
             arguments
