@@ -7,7 +7,6 @@ classdef ADP < handle
     %geometry
     properties
         SweepAngle
-        AR
         Span;
         WingArea;
         Thrust;
@@ -18,6 +17,19 @@ classdef ADP < handle
 
         V_HT; % Horizontal Tail Volume
         V_VT; % Vertical tail volume
+    end
+
+    properties(Dependent)
+        AR
+    end
+
+    methods
+        function value = get.AR(obj)
+            value = obj.Span^2/obj.WingArea;
+        end
+        function set.AR(obj, value)
+            obj.Span = sqrt(obj.WingArea*value);
+        end
     end
     %Aerodynamic
     properties
