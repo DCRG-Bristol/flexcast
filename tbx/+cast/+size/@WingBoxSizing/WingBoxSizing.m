@@ -30,6 +30,7 @@ classdef WingBoxSizing
         Spar_Min_Thickness = 1e-3;
 
         Index = 0;
+        Name string = "";
     end
     
     methods
