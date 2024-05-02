@@ -4,6 +4,7 @@ classdef SI
     
     properties(Constant)
         ft = 3.28084;
+        FL = 3.28084e-2; % Flight Level (hundreds of feet)
         inch = 39.3701;
         Nmile = 0.000539957;
         mile = 0.000621371;

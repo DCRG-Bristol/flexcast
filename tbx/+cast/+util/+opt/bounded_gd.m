@@ -1,7 +1,8 @@
-function val = bounded_gd(res,hunt_step)
+function val = bounded_gd(res,hunt_step,max_step)
     arguments
         res struct
         hunt_step double = 1e-3
+        max_step double = inf;
     end
     bounds = res(end).Bounds(1,:);
     deltas = res(end).Bounds(2,:);
@@ -14,6 +15,10 @@ function val = bounded_gd(res,hunt_step)
             c = res(end).X - m*res(end).Delta;
             val = m*(-0.382*res(end).Delta) + c;
         end   
+        delta = val-res(end).X;
+        if abs(delta)>abs(max_step)
+            val = res(end).X + sign(delta)*abs(max_step);
+        end
     else
         % valid boundary, first attempt gradient decent
         m = (bounds(2) - bounds(1)) / (deltas(2) - deltas(1));

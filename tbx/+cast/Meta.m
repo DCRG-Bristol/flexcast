@@ -50,7 +50,7 @@ classdef Meta
         HingeEta
     end
     methods
-        function PrintInfo(obj)
+        function m = PrintInfo(obj)
             m = [];
             m(1) = obj.PAX;
             m(end+1) = obj.Range_Design.*cast.SI.Nmile;
@@ -58,7 +58,7 @@ classdef Meta
             m(end+1) = obj.Range_asym.*cast.SI.Nmile;
             m(end+1) = obj.Range_ferry.*cast.SI.Nmile;
             m(end+1) = obj.MTOM.*cast.SI.Tonne;
-            m(end+1) = obj.OEM.*cast.SI.Tonne;
+            % m(end+1) = obj.OEM.*cast.SI.Tonne;
             m(end+1) = obj.Payload.*cast.SI.Tonne;
             m(end+1) = obj.Payload_asym.*cast.SI.Tonne;
             m(end+1) = obj.MZFM.*cast.SI.Tonne;

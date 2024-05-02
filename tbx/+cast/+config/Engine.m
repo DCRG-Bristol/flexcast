@@ -10,9 +10,23 @@ classdef Engine
         SFC_cruise
         T_Static
         BPR;
+
+        SFC_A = 0.45;
+        SFC_B = 0.54;
     end
     methods
-        function obj = Engine(T_Static,L,D,M,SFC_TO,SFC_cruise,BPR)
+        function obj = Engine(T_Static,L,D,M,SFC_TO,SFC_cruise,BPR,alt_cruise,M_cruise)
+            arguments
+                T_Static
+                L
+                D
+                M
+                SFC_TO
+                SFC_cruise
+                BPR
+                alt_cruise = 32e3 ./ cast.SI.ft
+                M_cruise = 0.78
+            end
             obj.T_Static = T_Static;
             obj.Length = L;
             obj.Diameter = D;
@@ -20,27 +34,42 @@ classdef Engine
             obj.SFC_TO = SFC_TO;
             obj.SFC_cruise = SFC_cruise;
             obj.BPR = BPR;
+
+            obj.SFC_A = obj.SFC_TO;
+            [~,~,T,~,~,~,~] = cast.util.atmos(alt_cruise);
+            [~,~,T0,~,~,~,~] = cast.util.atmos(0);
+            obj.SFC_B = (obj.SFC_cruise / sqrt(T/T0) - obj.SFC_A)/M_cruise;
         end
         function eng_new = Rubberise(obj,T_new)
             f = T_new/obj.T_Static;
             % rubberise a new engine using scaling laws from Raymer (10.1 - 10.3)
             eng_new = cast.config.Engine(T_new,obj.Length*f^0.4,obj.Diameter*f^0.5,obj.Mass*f^1.1,...
                 obj.SFC_TO,obj.SFC_cruise,obj.BPR);
+            eng_new.SFC_A = obj.SFC_A;
+            eng_new.SFC_B = obj.SFC_B;
         end
-
+        function TSFC = TSFC(obj,M,alt)
+            [~,~,T,~,~,~,~] = cast.util.atmos(alt);
+            [~,~,T0,~,~,~,~] = cast.util.atmos(0);
+            TSFC = (obj.SFC_A + obj.SFC_B.*M).*sqrt(T./T0);
+        end
     end
     
     methods(Static)
         
-        function obj = CFM_LEAP_1A(sfc_scaling)
+        function obj = CFM_LEAP_1A(sfc_scaling,alt_cruise,M_cruise)
             arguments
-                 sfc_scaling = 1;
+                sfc_scaling = 1;
+                alt_cruise = 32e3 ./ cast.SI.ft
+                M_cruise = 0.78
             end
             %CFM_LEAP_1A SData for CFM LEAP-1A
-            %   https://en.wikipedia.org/wiki/CFM_International_LEAP
-            %   SFC_To is a guess
+            %   https://www.easa.europa.eu/en/downloads/20086/en
             f = 1./(cast.SI.lb/(cast.SI.lbf*cast.SI.hr)) * sfc_scaling; % to convert SFC from imperial to SI.
-            obj = cast.config.Engine(143.05e3*0.846,3.328,2.4,3153,0.3*f,0.515*f,11);
+            BPR = 11;
+            SFC_T0 = 19*exp(-0.12*BPR)*1e-6 * sfc_scaling; % from Aircraft Design: A Conceptual Approach, Raymer, 5th Ed. eq.10.7
+            SFC_cruise = 25*exp(-0.05*BPR)*1e-6 * sfc_scaling; % from Aircraft Design: A Conceptual Approach, Raymer, 5th Ed. eq.10.9 (very close to value on wikipedia)
+            obj = cast.config.Engine(143050,3.328,2.4,3008,SFC_T0,SFC_cruise,BPR,alt_cruise,M_cruise);
         end
         function obj = CFM56_5()
             %CFM56_5 Data for CFM56-5 as on a318/a319
