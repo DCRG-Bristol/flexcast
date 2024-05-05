@@ -36,8 +36,8 @@ classdef Engine
             obj.BPR = BPR;
 
             obj.SFC_A = obj.SFC_TO;
-            [~,~,T,~,~,~,~] = cast.util.atmos(alt_cruise);
-            [~,~,T0,~,~,~,~] = cast.util.atmos(0);
+            [~,~,T,~,~,~,~] = ads.util.atmos(alt_cruise);
+            [~,~,T0,~,~,~,~] = ads.util.atmos(0);
             obj.SFC_B = (obj.SFC_cruise / sqrt(T/T0) - obj.SFC_A)/M_cruise;
         end
         function eng_new = Rubberise(obj,T_new)
@@ -49,8 +49,8 @@ classdef Engine
             eng_new.SFC_B = obj.SFC_B;
         end
         function TSFC = TSFC(obj,M,alt)
-            [~,~,T,~,~,~,~] = cast.util.atmos(alt);
-            [~,~,T0,~,~,~,~] = cast.util.atmos(0);
+            [~,~,T,~,~,~,~] = ads.util.atmos(alt);
+            [~,~,T0,~,~,~,~] = ads.util.atmos(0);
             TSFC = (obj.SFC_A + obj.SFC_B.*M).*sqrt(T./T0);
         end
     end

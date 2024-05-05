@@ -49,6 +49,20 @@ classdef SkinParams
             obj.StrgThickness_Web=1e-3*ones(1,NumEl);
             obj.StrgThickness_Flange=1e-3*ones(1,NumEl);
         end
+        function obj = apply(obj,obj2)
+            if obj.NumEl ~= obj2.NumEl
+                error('Must be same number of skin params')
+            end
+            obj.Skin_Thickness = obj2.Skin_Thickness;
+            obj.Effective_Width = obj2.Effective_Width;
+            obj.Strg_Pitch = obj2.Strg_Pitch;
+            obj.Strg_Depth = obj2.Strg_Depth;
+            obj.StrgFlange_Width = obj2.StrgFlange_Width;
+            obj.StrgGround_Width = obj2.StrgGround_Width;
+            obj.StrgThickness_Ground = obj2.StrgThickness_Ground;
+            obj.StrgThickness_Web = obj2.StrgThickness_Web;
+            obj.StrgThickness_Flange = obj2.StrgThickness_Flange;
+        end
         function new_obj = interpolate(obj,etas)
             %METHOD1 Summary of this method goes here
             %   Detailed explanation goes here

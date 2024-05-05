@@ -38,20 +38,27 @@ classdef WingBoxSizing
             if ~isa(obj2,class(obj1))
                 error('cannot compare %s to %s',class(obj1),class(obj2))
             end
-            val = inf;
-            for i = 1:length(obj1)
-                % skin thickness delta
-                st_delta = (obj2(i).Skin.Skin_Thickness - obj1(i).Skin.Skin_Thickness);
-                st_delta = st_delta./obj1(i).Skin.Skin_Thickness;
-                indicator1=max(abs(st_delta));
-                
-                % web thickness indicator
-                tsw_delta = (obj2(i).SparWeb_Thickness - obj1(i).SparWeb_Thickness);
-                tsw_delta = tsw_delta./obj1(i).SparWeb_Thickness;
-                indicator2=max(abs(tsw_delta));
-    
-                %overall indicator
-                val=max([indicator1,indicator2]);
+            if length(obj1) ~= length(obj2)
+                val = inf;
+            else
+                val = ones(length(obj1),1)*inf;
+                for i = 1:length(obj1)
+                    if obj1(i).NumEl == obj2(i).NumEl
+                        % skin thickness delta
+                        st_delta = (obj2(i).Skin.Skin_Thickness - obj1(i).Skin.Skin_Thickness);
+                        st_delta = st_delta./obj1(i).Skin.Skin_Thickness;
+                        indicator1=max(abs(st_delta));
+                        
+                        % web thickness indicator
+                        tsw_delta = (obj2(i).SparWeb_Thickness - obj1(i).SparWeb_Thickness);
+                        tsw_delta = tsw_delta./obj1(i).SparWeb_Thickness;
+                        indicator2=max(abs(tsw_delta));
+            
+                        %overall indicator
+                        val(i)=max([indicator1,indicator2]);
+                    end
+                end
+                val = max(val);
             end
         end
 
@@ -89,21 +96,43 @@ classdef WingBoxSizing
             obj.Skin = cast.size.SkinParams(nan,Span,Etas=obj.Eta);
         end
 
-        function new_obj = interpolate(obj,etas)
+        function obj = apply(obj,params)
             arguments
                 obj
-                etas double = [];
+                params cast.size.WingBoxSizing
+            end
+            if obj.NumEl ~= params.NumEl
+                error('Number of elements must be the same')
+            end
+            obj.SparCap_Thickness = params.SparCap_Thickness;
+            obj.SparWeb_Thickness = params.SparWeb_Thickness;
+            obj.SparWeb_Stiff_N = params.SparWeb_Stiff_N;
+            obj.SparWeb_Thickness = params.SparWeb_Thickness;
+            obj.SparWeb_Stiff_N = params.SparWeb_Stiff_N;
+            obj.SparWeb_Stiff_Thickness = params.SparWeb_Stiff_Thickness;
+
+            obj.Ribs = obj.Ribs.apply(params.Ribs);
+            obj.Skin = obj.Skin.apply(params.Skin);
+        end
+
+        function new_obj = interpolate(obj,etas)
+            % return a new WingBoxSizing object with interpolated values
+            arguments
+                obj
+                etas double;
             end
             %INTERPOLATE Summary of this method goes here
             %   Detailed explanation goes here
             span = (etas(end)-etas(1))*obj.Span;
             new_obj = cast.size.WingBoxSizing(nan,span,obj.Mat,'Etas',etas./etas(end),'RibPitch',obj.Ribs.IdealPitch);
+            new_obj.Width = interp1(obj.Eta,obj.Width,etas);
+            new_obj.Height = interp1(obj.Eta,obj.Height,etas);
             new_obj.SparCap_Thickness = interp1(obj.Eta,obj.SparCap_Thickness,etas);
             new_obj.SparWeb_Thickness = interp1(obj.Eta,obj.SparWeb_Thickness,etas);
             % new_obj.Width = interp1(obj.Eta,obj.Width,etas);
             % new_obj.Height = interp1(obj.Eta,obj.Height,etas);
             psi = [0,(obj.Eta(2:end)+obj.Eta(1:end-1))/2,1];
-            new_obj.SparWeb_Stiff_N = ceil(interp1(psi,obj.SparWeb_Stiff_N([1,1:end,end]),(etas(2:end)+etas(1:end-1))/2));
+            new_obj.SparWeb_Stiff_N = interp1(psi,obj.SparWeb_Stiff_N([1,1:end,end]),(etas(2:end)+etas(1:end-1))/2);
             new_obj.SparWeb_Stiff_Thickness = interp1(psi,obj.SparWeb_Stiff_Thickness([1,1:end,end]),(etas(2:end)+etas(1:end-1))/2);
             new_obj.Ribs = obj.Ribs.interpolate(etas);
             new_obj.Skin = obj.Skin.interpolate(etas);
@@ -122,6 +151,8 @@ classdef WingBoxSizing
 
             new_obj.Ribs = obj.Ribs.combine(obj2.Ribs);
             new_obj.Skin = obj.Skin.combine(obj2.Skin);
+            % tidy up machine precisoin errors
+            new_obj.Eta = round(new_obj.Eta,10);
         end
 
     end
@@ -156,7 +187,7 @@ classdef WingBoxSizing
             for i = 1:length(obj)
                 obj(i).SparCap_Thickness = obj(i).SparCap_Thickness .* val;
                 obj(i).SparWeb_Thickness = obj(i).SparWeb_Thickness .* val;
-                obj(i).SparWeb_Stiff_N = round(obj(i).SparWeb_Stiff_N .* val);
+                obj(i).SparWeb_Stiff_N = obj(i).SparWeb_Stiff_N .* val;
                 obj(i).SparWeb_Stiff_Thickness = obj(i).SparWeb_Stiff_Thickness .* val;
                 obj(i).Ribs = obj(i).Ribs .* val;
                 obj(i).Skin = obj(i).Skin .* val;
@@ -169,7 +200,7 @@ classdef WingBoxSizing
             for i = 1:length(obj)
                 obj(i).SparCap_Thickness = obj(i).SparCap_Thickness ./ val;
                 obj(i).SparWeb_Thickness = obj(i).SparWeb_Thickness ./ val;
-                obj(i).SparWeb_Stiff_N = round(obj(i).SparWeb_Stiff_N ./ val);
+                obj(i).SparWeb_Stiff_N = obj(i).SparWeb_Stiff_N ./ val;
                 obj(i).SparWeb_Stiff_Thickness = obj(i).SparWeb_Stiff_Thickness ./ val;
                 obj(i).Ribs = obj(i).Ribs ./ val;
                 obj(i).Skin = obj(i).Skin ./ val;

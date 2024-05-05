@@ -26,8 +26,16 @@ elseif n == 2
 else
     if any(isinf(res(n-1).Bounds),'all')
         % yet to find a boundary so update it from the guesses with biggest delta
-        [~,idx_min] = min([res.Delta]);
-        [~,idx_max] = max([res.Delta]);
+        [delta,idx_s] = sort([res.Delta]);
+        if sign(delta(1))~=sign(delta(end))
+            % a boundary exists
+            [~,idx_cross] = find(delta>0,1);
+            idx_max = idx_s(idx_cross);
+            idx_min = idx_s(idx_cross-1);
+        else
+            [~,idx_min] = min(delta);
+            [~,idx_max] = max(delta);
+        end
         res(n).Bounds = get_boundary(res([idx_min,idx_max]));
     else
         %update boundary

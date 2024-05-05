@@ -51,6 +51,12 @@ classdef RibParams
         function obj = rdivide(obj,val)
             obj.Thickness = obj.Thickness ./ val;
         end
+        function obj = apply(obj,obj2)
+            if obj.NumEl ~= obj2.NumEl
+                error('Must be same number of ribs')
+            end
+            obj.Thickness = obj2.Thickness;
+        end
         function new_obj = interpolate(obj,etas)
             span = obj.Span*(etas(end)-etas(1));
             new_obj = cast.size.RibParams(span,obj.IdealPitch);

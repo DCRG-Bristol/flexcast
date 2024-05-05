@@ -7,7 +7,7 @@ CD0 = sum([obj.CD0_meta.CD0]);
 % CD0 = CD0 + CD0 * 0.015 + 0.035/obj.WingArea; % 10.2514/1.C036529 (near Eq. 5)
 
 % cruise info
-[rho,a] = cast.util.atmos(obj.ADR.Alt_cruise);
+[rho,a] = ads.util.atmos(obj.ADR.Alt_cruise);
 e_c = obj.EstimateOswald(obj.ADR.M_c,"Nita");
 CL_c = obj.Mf_TOC*obj.MTOM*9.81/(1/2*rho*(a*obj.ADR.M_c)^2*obj.WingArea);
 CD_c = CD0 + CL_c^2/(pi*obj.AR*e_c);

@@ -96,7 +96,7 @@ classdef TAW < cast.ADP
 
             % cruise condition
             M_c = obj.ADR.M_c;
-            [rho,a] = cast.util.atmos(obj.ADR.Alt_cruise);
+            [rho,a] = ads.util.atmos(obj.ADR.Alt_cruise);
             q_c = 0.5*rho*(M_c*a)^2;
             span = sqrt(obj.AR*obj.WingArea);
 
@@ -104,7 +104,7 @@ classdef TAW < cast.ADP
             PAX = obj.ADR.PAX;
 %             N_sr = max(6,round(0.45*sqrt(PAX)));       % number of seats per row
             N_sr = 6;
-            N_a = cast.util.tern(N_sr>6,2,1);   % number of aisles
+            N_a = ads.util.tern(N_sr>6,2,1);   % number of aisles
             N_arm = N_sr+1+N_a;                 % number of armrests
             Nr = PAX/N_sr;                      % number of rows
             %length of sections

@@ -6,7 +6,7 @@ function TW = ROC_Mach_Vv(WS,ADP,M,Vv,alt)
 % theta - climb gradient in degrees
 % alt - altitude in metres
 
-[~,a] = cast.util.atmos(alt);
+[~,a] = ads.util.atmos(alt);
 V = M*a;
 theta = asind(Vv/V);
 TW = cast.ca.sg.ROC_Mach(WS,ADP,M,theta,alt);

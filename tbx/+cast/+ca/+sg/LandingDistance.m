@@ -6,7 +6,7 @@ function WS = LandingDistance(ADP,alt,WSi)
 % theta - climb gradient in degrees
 % alt - altitude in metres
 
-rho = cast.util.atmos(alt);
+rho = ads.util.atmos(alt);
 CL_max = ADP.CL_max;
 tau = 5; % assume takes 5 seconds to apply brakes
 g = 9.80665;

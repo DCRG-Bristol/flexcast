@@ -6,7 +6,7 @@ arguments
 end
 %TLR Thrust lapse ratio as per Howe 2000 Aircraft Conceptual Design
 %Synthesis p.67
-[~,~,~,~,~,~,sigma] = cast.util.atmos(alt);
+[~,~,~,~,~,~,sigma] = ads.util.atmos(alt);
 
 if BPR >=8
     ks = [1 0 -0.595 -0.03;0.89 -0.014 -0.3 0.005];

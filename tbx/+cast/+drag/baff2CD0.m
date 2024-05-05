@@ -26,7 +26,7 @@ arguments
     opts.pLamWing = 0.1;
     opts.pWingMaxThickness = 0.5;
 end
-[rho,a,~,~,nu] = cast.util.atmos(alt);
+[rho,a,~,~,nu] = ads.util.atmos(alt);
 switch class(ele)   
     case 'cast.drag.DraggableBluffBody'
         D = max([ele.Stations.Radius])*2;

@@ -21,11 +21,14 @@ function [EWF,fs] = MissionFraction(Segments,ADP,opts)
                 % split climb into 1000ft sections
                 dh = 1000/cast.SI.ft;
                 hs = unique([s.StartAlt:dh:s.EndAlt,s.EndAlt]);
+                if length(hs) == 1
+                    hs = [hs,hs];
+                end
                 deltaH = hs(2:end)-hs(1:end-1);
                 deltaf = 1;
                 for j = 1:length(deltaH)
                     h_mean = (hs(j)+hs(j+1))/2;
-                    [rho,a,T] = cast.util.atmos(h_mean);
+                    [rho,a,T] = ads.util.atmos(h_mean);
                     if opts.OverideLD
                         CL_c = EWF*deltaf*opts.M_TO*9.81/(1/2*rho*(a*ADP.ADR.M_c)^2*ADP.WingArea);
                         CD_c = ADP.CD0 + CL_c^2/(pi*ADP.AR*ADP.e);
@@ -38,7 +41,7 @@ function [EWF,fs] = MissionFraction(Segments,ADP,opts)
                 end      
                 f = deltaf;        
             case 'cast.mission.Cruise'
-                [rho,a] = cast.util.atmos(s.StartAlt);
+                [rho,a] = ads.util.atmos(s.StartAlt);
                 if opts.OverideLD
                     CL_c = EWF*opts.M_TO*9.81/(1/2*rho*(a*s.Mach)^2*ADP.WingArea);
                     CD_c = ADP.CD0 + CL_c^2/(pi*ADP.AR*ADP.e);
@@ -50,6 +53,9 @@ function [EWF,fs] = MissionFraction(Segments,ADP,opts)
             case 'cast.mission.Decent'
                 dh = -1000/cast.SI.ft;
                 hs = fliplr(unique([s.StartAlt:dh:s.EndAlt,s.EndAlt]));
+                if length(hs) == 1
+                    hs = [hs,hs];
+                end
                 deltaH = hs(2:end)-hs(1:end-1);
                 deltaf = 1;
                 TW = ADP.TW_idle; % assume idle power

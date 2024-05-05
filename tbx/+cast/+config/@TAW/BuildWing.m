@@ -14,7 +14,7 @@ else
     Tag = '_LHS';
 end
 M_c = obj.ADR.M_c;
-[rho,a] = cast.util.atmos(obj.ADR.Alt_cruise);
+[rho,a] = ads.util.atmos(obj.ADR.Alt_cruise);
 q_c = 0.5*rho*(M_c*a)^2;
 span = sqrt(obj.AR*obj.WingArea);
 

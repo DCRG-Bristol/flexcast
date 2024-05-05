@@ -6,7 +6,7 @@ function TW = CVT(WS,ADP,BankAngle,V,theta,alt)
 % theta - climb gradient in degrees
 % alt - altitude in metres
 
-rho = cast.util.atmos(alt);
+rho = ads.util.atmos(alt);
 q = 1/2*rho*V^2;
 CD0 = ADP.CD0;
 k = 1/(pi*ADP.AR*ADP.e);

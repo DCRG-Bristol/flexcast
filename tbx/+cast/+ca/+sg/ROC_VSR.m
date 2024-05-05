@@ -5,7 +5,7 @@ function TW = ROC_VSR(WS,ADP,factor,CL_max,theta,alt)
 % V - flight speed
 % theta - climb gradient in degrees
 % alt - altitude in metres
-rho = cast.util.atmos(alt);
+rho = ads.util.atmos(alt);
 V = factor*sqrt(WS.*2/(rho*CL_max));
 q = 1/2*rho*V.^2;
 CD0 = ADP.CD0;
