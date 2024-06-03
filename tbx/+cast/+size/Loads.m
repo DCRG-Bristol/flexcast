@@ -274,28 +274,45 @@ classdef Loads
             arguments
                 obj
                 load string {mustBeMember(load,{'Fx','Fy','Fz','Mx','My','Mz'})}
-                Params WingBoxSizing
+                Params cast.size.WingBoxSizing
                 opts.PlotIdx logical = false
                 opts.Row = nan;
+                opts.Norm = nan; % index of row to normalise data with
+                opts.Xidx = nan;
+                opts.XScale = 1;
 %                 opts.PlotSeperators logical = true
             end
             Spans = [Params.Span];
             Etas = [0,cumsum(Spans)./sum(Spans)];
+            p = [];
             for i = 1:length(obj)
                 hold on
                 xs = Params(i).Eta * (Etas(i+1)-Etas(i)) + Etas(i);
+                if isnan(opts.Xidx)
+                    opts.Xidx = 1:length(xs);
+                end
                 if ~opts.PlotIdx
+                    data = obj(i).(load).*opts.XScale;
+                    if ~isnan(opts.Norm)
+                        data = data ./ repmat(data(opts.Norm,:),size(data,1),1);
+                    end
                     if any(isnan(opts.Row))
-                        p(i) = plot(xs,obj(i).(load),'-');
+                        tmp = plot(xs,data(:,opts.Xidx),'-');
                     else
-                        p(i) = plot(xs,obj(i).(load)(opts.Row,:),'-');
+                        tmp = plot(xs,data(opts.Row,opts.Xidx),'-');
                     end
                 else
+                    data = obj(i).(load+"Idx");
                     if any(isnan(opts.Row))
-                        p(i) = plot(xs,obj(i).(load+"Idx"),'-');
+                        tmp = plot(xs,data(:,opts.Xidx),'-');
                     else
-                        p(i) = plot(xs,obj(i).(load+"Idx")(opts.Row,:),'-');
+                        tmp = plot(xs,data(opts.Row,opts.Xidx),'-');
                     end
+                end
+                if isempty(p)
+                    p = tmp;
+                else
+                    p = [p;tmp];
                 end
             end
         end

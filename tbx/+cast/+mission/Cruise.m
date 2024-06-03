@@ -6,13 +6,21 @@ classdef Cruise < cast.mission.Segment
         StartAlt
         Range
         Mach
+        CAS = nan
     end
     
     methods
-        function obj = Cruise(StartAlt,Range,Mach)
+        function obj = Cruise(StartAlt,Range,Mach,CAS)
+            arguments
+                StartAlt
+                Range
+                Mach
+                CAS = nan;
+            end
              obj.StartAlt = StartAlt;
              obj.Range = Range;
              obj.Mach = Mach;
+             obj.CAS = CAS;
         end
     end
 end

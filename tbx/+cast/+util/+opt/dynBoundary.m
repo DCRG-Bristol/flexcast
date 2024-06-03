@@ -4,6 +4,7 @@ arguments
     x
     value
     opts.target = 0
+    opts.UpdateBoundary = true
 end
 % Bounded gradient descent - appends a guess to the data structure res
 % and then performs a gradient descent to find the next guess.
@@ -16,7 +17,7 @@ res(n).N = n;
 res(n).X = x;
 res(n).Y = value;
 res(n).Delta = value - opts.target;
-
+if opts.UpdateBoundary
 %% update boundary
 if n == 1
     % if the first guess, set the boundary to be the entire space
@@ -55,7 +56,7 @@ else
         end
     end
 end
-
+end
 end
 
 function boundary = get_boundary(res)

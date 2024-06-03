@@ -87,7 +87,7 @@ classdef Meta
             m(end+1) = "Asym. Range [nm]";
             m(end+1) = "Ferry Range [nm]";
             m(end+1) = "MTOM [tn]";
-            m(end+1) = "OEM [tn]";
+            % m(end+1) = "OEM [tn]";
             m(end+1) = "Payload [tn]";
             m(end+1) = "Payload Asym. [tn]";
             m(end+1) = "MZFM [tn]";

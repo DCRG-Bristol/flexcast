@@ -63,14 +63,14 @@ for i=1:length(length(w))
         
         sp=be(i);
         
-        offset=0.5*sp:sp:w/2;
+        offset=0.5*sp:sp:(w(i)/2);
         Izz_strg(i)=(Num_strg(i)*Izz_strg_(i) + Strg_Area(i)*(sum(offset.^2)))*2;
         
     elseif mod(Num_strg(i),2)==1
         
         sp=be(i);
         
-        offset=0:sp:w/2;
+        offset=0:sp:(w(i)/2);
         Izz_strg(i)=(Num_strg(i)*Izz_strg_(i) + Strg_Area(i)*(sum(offset.^2)))*2;
         
     end

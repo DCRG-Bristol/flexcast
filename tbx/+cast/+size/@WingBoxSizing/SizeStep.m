@@ -146,7 +146,10 @@ A=pi^2*Par.Mat.E/12; % critical thickness for wide column buckling
 c=1;
 t_cb=(F_crush.*(h_rib./sqrt(c)).^2./(A*w_rib)).^(1/3);
 
-Par.Ribs.Thickness=max([t_y;t_cb]); % set rib thickness
+Par.Ribs.Thickness=max([t_y;t_cb;repmat(Par.Spar_Min_Thickness,1,numel(t_cb))]); % set rib thickness
+if Par.Ribs.Eta(end) == 1
+    Par.Ribs.Thickness(end) = Par.Ribs.Thickness(end-1);
+end
 
 %% web stiffner sizing 
 Seg_len = (Par.Eta(2:end) - Par.Eta(1:(end-1)))*Par.Span;

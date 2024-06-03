@@ -8,11 +8,13 @@ classdef SI
         inch = 39.3701;
         Nmile = 0.000539957;
         mile = 0.000621371;
+        km = 1e-3;
     end
     %pressure
     properties(Constant)
         lbft = 0.0208854342;
         psi = 0.0001450377;
+        bar = 1e-5;
     end
     %force
     properties(Constant)

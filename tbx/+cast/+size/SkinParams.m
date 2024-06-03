@@ -68,15 +68,15 @@ classdef SkinParams
             %   Detailed explanation goes here
             span = (etas(end)-etas(1))*obj.Span;
             new_obj = cast.size.SkinParams(nan,span,Etas=etas./etas(end));
-            new_obj.Skin_Thickness = interp1(obj.Eta,obj.Skin_Thickness,etas);
-            new_obj.Effective_Width = interp1(obj.Eta,obj.Effective_Width,etas);
-            new_obj.Strg_Pitch = interp1(obj.Eta,obj.Strg_Pitch,etas);
-            new_obj.Strg_Depth = interp1(obj.Eta,obj.Strg_Depth,etas);
-            new_obj.StrgFlange_Width = interp1(obj.Eta,obj.StrgFlange_Width,etas);
-            new_obj.StrgGround_Width = interp1(obj.Eta,obj.StrgGround_Width,etas);
-            new_obj.StrgThickness_Ground = interp1(obj.Eta,obj.StrgThickness_Ground,etas);
-            new_obj.StrgThickness_Web = interp1(obj.Eta,obj.StrgThickness_Web,etas);
-            new_obj.StrgThickness_Flange = interp1(obj.Eta,obj.StrgThickness_Flange,etas);
+            new_obj.Skin_Thickness = interp1(obj.Eta,obj.Skin_Thickness,etas,'linear','extrap');
+            new_obj.Effective_Width = interp1(obj.Eta,obj.Effective_Width,etas,'linear','extrap');
+            new_obj.Strg_Pitch = interp1(obj.Eta,obj.Strg_Pitch,etas,'linear','extrap');
+            new_obj.Strg_Depth = interp1(obj.Eta,obj.Strg_Depth,etas,'linear','extrap');
+            new_obj.StrgFlange_Width = interp1(obj.Eta,obj.StrgFlange_Width,etas,'linear','extrap');
+            new_obj.StrgGround_Width = interp1(obj.Eta,obj.StrgGround_Width,etas,'linear','extrap');
+            new_obj.StrgThickness_Ground = interp1(obj.Eta,obj.StrgThickness_Ground,etas,'linear','extrap');
+            new_obj.StrgThickness_Web = interp1(obj.Eta,obj.StrgThickness_Web,etas,'linear','extrap');
+            new_obj.StrgThickness_Flange = interp1(obj.Eta,obj.StrgThickness_Flange,etas,'linear','extrap');
         end
         function new_obj = combine(obj,obj2)
             span = obj.Span + obj2.Span;

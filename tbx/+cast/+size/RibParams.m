@@ -6,6 +6,7 @@ classdef RibParams
         IdealPitch          % Specified rib pitch
         Thickness;          % Thickness of each rob
         Span
+        Min_Thickness = 1e-3;
     end
     % properties(Dependent)
     %     Span
@@ -52,25 +53,32 @@ classdef RibParams
             obj.Thickness = obj.Thickness ./ val;
         end
         function obj = apply(obj,obj2)
-            if obj.NumEl ~= obj2.NumEl
-                error('Must be same number of ribs')
-            end
-            obj.Thickness = obj2.Thickness;
+            % wings can have diffetn numbers of ribs so we need to interpolate again
+            obj.Thickness = interp1(obj2.Eta,obj2.Thickness,obj.Eta,'linear','extrap');
+            obj.Thickness(obj.Thickness<obj.Min_Thickness) = obj.Min_Thickness;
         end
         function new_obj = interpolate(obj,etas)
             span = obj.Span*(etas(end)-etas(1));
             new_obj = cast.size.RibParams(span,obj.IdealPitch);
-            new_obj.Thickness = interp1(obj.Eta,obj.Thickness,new_obj.Eta);
+            new_obj.Thickness = interp1(obj.Eta,obj.Thickness,new_obj.Eta*span/obj.Span,'linear','extrap');
         end
         function new_obj = combine(obj,obj2)
-            new_obj = cast.size.RibParams(obj.Span+obj2.Span,obj.IdealPitch);
-            etas = obj.Eta*obj.Span/new_obj.Span;
-            etas = [etas obj2.Eta*(obj2.Span/new_obj.Span)+obj.Span/new_obj.Span];
+            new_span = obj.Span+obj2.Span;
+            new_obj = cast.size.RibParams(new_span,obj.IdealPitch);
+            etas = obj.Eta*obj.Span/new_span;
+            etas = [etas obj2.Eta*(obj2.Span/new_span)+obj.Span/new_span];
+            thickness = [obj.Thickness obj2.Thickness];
             [etas,idx] = unique(etas);
-            idx1 = idx(idx<=obj.NumEl);
-            idx2 = idx(idx>obj.NumEl)-obj.NumEl;
-            thicknesses = [obj.Thickness(idx1) obj2.Thickness(idx2)];
-            new_obj.Thickness = interp1(etas,thicknesses,new_obj.Eta);
+
+            new_obj.NumEl = length(etas);
+            new_obj.Eta = etas;
+            new_obj.Thickness = thickness(idx);
+            new_obj.ActualPitch = new_span/(new_obj.NumEl-1);
+
+            % idx1 = idx(idx<=obj.NumEl);
+            % idx2 = idx(idx>obj.NumEl)-obj.NumEl;
+            % thicknesses = [obj.Thickness(idx1) obj2.Thickness(idx2)];
+            % new_obj.Thickness = interp1(etas,thicknesses,new_obj.Eta,'linear','extrap');
         end
     end
 end

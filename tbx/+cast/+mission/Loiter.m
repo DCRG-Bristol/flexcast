@@ -6,13 +6,21 @@ classdef Loiter < cast.mission.Segment
         StartAlt
         Time
         Mach
+        e_delta = 0;
     end
     
     methods
-        function obj = Loiter(StartAlt,Time,Mach)
-             obj.StartAlt = StartAlt;
-             obj.Time = Time;
-             obj.Mach = Mach;
+        function obj = Loiter(StartAlt,Time,Mach,e_delta)
+            arguments
+                StartAlt
+                Time
+                Mach
+                e_delta = 0;
+            end
+            obj.StartAlt = StartAlt;
+            obj.Time = Time;
+            obj.Mach = Mach;
+            obj.e_delta = e_delta;
         end
     end
 end

@@ -110,7 +110,6 @@ classdef WingBoxSizing
             obj.SparWeb_Thickness = params.SparWeb_Thickness;
             obj.SparWeb_Stiff_N = params.SparWeb_Stiff_N;
             obj.SparWeb_Stiff_Thickness = params.SparWeb_Stiff_Thickness;
-
             obj.Ribs = obj.Ribs.apply(params.Ribs);
             obj.Skin = obj.Skin.apply(params.Skin);
         end
@@ -125,15 +124,15 @@ classdef WingBoxSizing
             %   Detailed explanation goes here
             span = (etas(end)-etas(1))*obj.Span;
             new_obj = cast.size.WingBoxSizing(nan,span,obj.Mat,'Etas',etas./etas(end),'RibPitch',obj.Ribs.IdealPitch);
-            new_obj.Width = interp1(obj.Eta,obj.Width,etas);
-            new_obj.Height = interp1(obj.Eta,obj.Height,etas);
-            new_obj.SparCap_Thickness = interp1(obj.Eta,obj.SparCap_Thickness,etas);
-            new_obj.SparWeb_Thickness = interp1(obj.Eta,obj.SparWeb_Thickness,etas);
+            new_obj.Width = interp1(obj.Eta,obj.Width,etas,'linear','extrap');
+            new_obj.Height = interp1(obj.Eta,obj.Height,etas,'linear','extrap');
+            new_obj.SparCap_Thickness = interp1(obj.Eta,obj.SparCap_Thickness,etas,'linear','extrap');
+            new_obj.SparWeb_Thickness = interp1(obj.Eta,obj.SparWeb_Thickness,etas,'linear','extrap');
             % new_obj.Width = interp1(obj.Eta,obj.Width,etas);
             % new_obj.Height = interp1(obj.Eta,obj.Height,etas);
             psi = [0,(obj.Eta(2:end)+obj.Eta(1:end-1))/2,1];
-            new_obj.SparWeb_Stiff_N = interp1(psi,obj.SparWeb_Stiff_N([1,1:end,end]),(etas(2:end)+etas(1:end-1))/2);
-            new_obj.SparWeb_Stiff_Thickness = interp1(psi,obj.SparWeb_Stiff_Thickness([1,1:end,end]),(etas(2:end)+etas(1:end-1))/2);
+            new_obj.SparWeb_Stiff_N = interp1(psi,obj.SparWeb_Stiff_N([1,1:end,end]),(etas(2:end)+etas(1:end-1))/2,'linear','extrap');
+            new_obj.SparWeb_Stiff_Thickness = interp1(psi,obj.SparWeb_Stiff_Thickness([1,1:end,end]),(etas(2:end)+etas(1:end-1))/2,'linear','extrap');
             new_obj.Ribs = obj.Ribs.interpolate(etas);
             new_obj.Skin = obj.Skin.interpolate(etas);
         end

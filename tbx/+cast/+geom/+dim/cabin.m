@@ -25,8 +25,8 @@ function [L,D] = cabin(PAX,opts)
         delta_d = 0.46;
     else
         % A320 like
-        k_cabin = 0.91;
-        delta_d = 0.46;
+        k_cabin = 0.7632;
+        delta_d = 0.48;
     end
 
     % calculate cabin length and diameter

@@ -11,13 +11,13 @@ function [fuselage,Ls] = fuselage(L_cabin,D_cabin,opts)
         L_cabin (1,1) double {mustBeNumeric} % cabin length in meters
         D_cabin (1,1) double {mustBeNumeric} % cabin diameter in meters
         opts.L_cp (1,1) double {mustBeNumeric} = 4 % cockpit length in meters
-        opts.L_tail = D_cabin*1.6 % tail length in meters
+        opts.L_tail = D_cabin*1.4966 % tail length in meters
         opts.IsDraggable = true % make fuselage contribute to Drag
     end
     L_f = L_cabin + opts.L_cp + opts.L_tail;  % fuselage length
 
     x_c = D_cabin*1.3;              % transition point from cockpit to cabin
-    x_tail = L_f-D_cabin*3;         % transition point from cabin to tail
+    x_tail = L_f-D_cabin*2.5;         % transition point from cabin to tail
 
     % make cockpit object
     cockpit = baff.BluffBody.SemiSphere(x_c,D_cabin/2);

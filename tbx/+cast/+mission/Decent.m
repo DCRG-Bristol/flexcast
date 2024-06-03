@@ -8,26 +8,46 @@ classdef Decent < cast.mission.Segment
         ROC;
         Mach;
         Percentage = nan;
+        CAS = nan;
     end
     
     methods
-        function obj = Decent(StartAlt,EndAlt,ROC)
+        function obj = Decent(StartAlt,EndAlt,Mach,ROC,CAS)
+            arguments
+                StartAlt
+                EndAlt
+                Mach
+                ROC
+                CAS = nan;
+            end
             obj.StartAlt = StartAlt;
             obj.EndAlt = EndAlt;
             obj.ROC = ROC;
+            obj.Mach = Mach;
+            obj.CAS = CAS;
+        end
+        function [alt,M,TAS] = DecentProperties(obj);
+            delta_h = obj.EndAlt - obj.StartAlt;
+
+            alt = fliplr(unique([obj.EndAlt:500/cast.SI.ft:obj.StartAlt,obj.EndAlt]));
+            [rho,a,T,P,~,~,~] = ads.util.atmos(alt);
+            [rho_s,a_s,T_s,P_s,~,~,~] = ads.util.atmos(0);
+            VCAS = ads.util.calibrated_airspeed(obj.Mach,P,P_s,a_s,1.4);
+            TAS = ads.util.true_airspeed(obj.Mach,a,T,T_s);
+            % if no CAS defined assume CAS at cruise
+            if isnan(obj.CAS)
+                obj.CAS = VCAS(end);
+            end
+            % change TAS at alts where velocity is limited by CAS not Mach
+            idx = VCAS>=obj.CAS; 
+            TAS(idx) = ads.util.equivelent_true_airspeed(P(idx),rho(idx),P_s,rho_s,1.4,obj.CAS);
+            M = TAS./a;
         end
         function [r,t] = distanceEstimate(obj,M_c)
             delta_h = obj.EndAlt - obj.StartAlt;
             t = delta_h/obj.ROC;
-
-            [rho_0,a_0,T_0,P_0,~,~,~] = ads.util.atmos(0);
             % get cruise CAS
-            [~,~,~,P,~,~,~] = ads.util.atmos(obj.StartAlt);
-            CAS = ads.util.calibrated_airspeed(M_c,P,P_0,a_0,1.4);
-            %get change in TAS with Alt
-            alt = fliplr(unique([obj.StartAlt,obj.StartAlt:1000/cast.SI.ft:obj.EndAlt,obj.EndAlt]));
-            [rhos,~,~,Ps,~,~,~] = ads.util.atmos(alt);
-            TAS = ads.util.equivelent_true_airspeed(Ps,rhos,P_0,rho_0,1.4,CAS);
+            [alt,M,TAS] = DecentProperties(obj);
             %esimate time in each region
             dAlt = alt(2:end)-alt(1:end-1);
             dt = abs(dAlt./obj.ROC);

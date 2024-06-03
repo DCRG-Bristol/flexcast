@@ -5,6 +5,7 @@ classdef Draggable < handle
     properties
         DragEnabled = true;
         InterferanceFactor = 1;
+        pLam = 0.25;
     end
 end
 

@@ -9,6 +9,7 @@ classdef ADR
         ExtraPayload = 0;
         CrewMass
         V_app % approach speed
+        V_climb % climb speed (CAS)
         GroundRun
         GroundRunLanding
         M_c % cruise Mach number
@@ -16,16 +17,15 @@ classdef ADR
         Alt_cruise
     end
 
+    properties
+        M_alt % Mach number at each alititude to be limited by either M_c or V_climb
+    end
+
     % alternate airport diversion properties
     properties
         Alt_alternate = 22e3./cast.SI.ft;
         Range_alternate = 200./cast.SI.Nmile;
         Loiter = 30./cast.SI.min; % 30 minutes in seconds
-    end
-    
-    methods
-        function obj = ADR()
-        end
     end
     methods(Static)
         function obj = A320(PAX,Range,TargetPayload)
@@ -55,6 +55,7 @@ classdef ADR
             end
             obj.CrewMass = (80+10)*obj.Crew;
             obj.V_app = 100;
+            obj.V_climb = 290/cast.SI.knt;
         end
     end
 end
