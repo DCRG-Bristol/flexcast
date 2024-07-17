@@ -280,16 +280,22 @@ classdef Loads
                 opts.Norm = nan; % index of row to normalise data with
                 opts.Xidx = nan;
                 opts.XScale = 1;
-%                 opts.PlotSeperators logical = true
+                %                 opts.PlotSeperators logical = true
             end
             Spans = [Params.Span];
             Etas = [0,cumsum(Spans)./sum(Spans)];
             p = [];
+            xs = [];
+            Data = [];
+
+
             for i = 1:length(obj)
                 hold on
-                xs = Params(i).Eta * (Etas(i+1)-Etas(i)) + Etas(i);
+                xs = [xs,Params(i).Eta * (Etas(i+1)-Etas(i)) + Etas(i)];
                 if isnan(opts.Xidx)
-                    opts.Xidx = 1:length(xs);
+                    Xidx = 1:length(Params(i).Eta);
+                else
+                    Xidx = opts.Xidx;
                 end
                 if ~opts.PlotIdx
                     data = obj(i).(load).*opts.XScale;
@@ -297,24 +303,20 @@ classdef Loads
                         data = data ./ repmat(data(opts.Norm,:),size(data,1),1);
                     end
                     if any(isnan(opts.Row))
-                        tmp = plot(xs,data(:,opts.Xidx),'-');
+                        Data = [Data,data(:,Xidx)];
                     else
-                        tmp = plot(xs,data(opts.Row,opts.Xidx),'-');
+                        Data =  [Data,data(opts.Row,Xidx)];
                     end
                 else
                     data = obj(i).(load+"Idx");
                     if any(isnan(opts.Row))
-                        tmp = plot(xs,data(:,opts.Xidx),'-');
+                        Data =  [Data,data(:,Xidx)];
                     else
-                        tmp = plot(xs,data(opts.Row,opts.Xidx),'-');
+                        Data =  [Data,data(opts.Row,Xidx)];
                     end
                 end
-                if isempty(p)
-                    p = tmp;
-                else
-                    p = [p;tmp];
-                end
             end
+            p = plot(xs,Data,'-');
         end
     end
 end

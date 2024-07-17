@@ -1,7 +1,7 @@
 function [L,D] = cabin(PAX,opts)
     arguments
         PAX (1,1) double {mustBeInteger}    % passengers
-        opts.N_sr (1,1) double {mustBeInteger} = nan % seats per row
+        opts.N_sr (1,1) double {mustBeInteger} = 0 % seats per row
     end
     % retruns estimated cabin length and diameter based on number of passengers
     % PAX = number of passengers
@@ -9,7 +9,7 @@ function [L,D] = cabin(PAX,opts)
     % D = diameter in meters
 
     %estimate number of seats per row, aisles, armrests, and rows
-    if isnan(opts.N_sr)
+    if opts.N_sr == 0
         N_sr = max(6,round(0.45*sqrt(PAX)));
     else
         N_sr = opts.N_sr;
@@ -25,7 +25,7 @@ function [L,D] = cabin(PAX,opts)
         delta_d = 0.46;
     else
         % A320 like
-        k_cabin = 0.7632;
+        k_cabin = 0.7456;
         delta_d = 0.48;
     end
 

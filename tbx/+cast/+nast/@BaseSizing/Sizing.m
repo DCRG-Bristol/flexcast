@@ -2,13 +2,7 @@ function [Par,BinFolder,Lds,isError,indicator] = Sizing(obj,Cases,opts)
 arguments
     obj
     Cases (:,1) cast.LoadCase % Load Cases to run
-    opts.MaxStep = 40;
-    opts.Converge = 0.25; % in percentage change
-    opts.NGoldenSection = 10;
-    opts.CleanUp = true;
-    opts.BinFolder = '';
-    opts.Verbose = false;
-    opts.Silent = false;
+    opts cast.nast.Opts = cast.nast.Opts % Options for sizing
 end
 Par{1} = obj.WingBoxParams;
 indicator = inf;
@@ -16,13 +10,13 @@ if isempty(opts.BinFolder)
         opts.BinFolder = ads.nast.create_tmp_bin;
 end
 
-for n = 1:opts.MaxStep+1
-    if indicator*100 < opts.Converge
+for n = 1:opts.WingboxMaxStep+1
+    if indicator*100 < opts.WingboxConvergence
         isError = false;
         break
     else
-        if n == opts.MaxStep+1
-            if opts.MaxStep==1
+        if n == opts.WingboxMaxStep+1
+            if opts.WingboxMaxStep==1
                 % warning('Max iteration steps reached')
                 break
             else

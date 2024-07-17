@@ -1,7 +1,12 @@
-function [x,m] = GetSpanwiseMass(obj)
+
+function [X,M] = GetSpanwiseMass(obj)
 arguments
     obj cast.size.WingBoxSizing
 end
+spans = [obj.Span];
+Etas = [0,cumsum(spans)./sum(spans)];
+X = [];
+M = [];
 for i = 1:length(obj)
 %% get Volume of each segment
 Seg_eta = (obj(i).Eta(2:end) + obj(i).Eta(1:end-1))/2;
@@ -27,7 +32,7 @@ Vol_stiff=(0.0254*2)*obj(i).SparWeb_Stiff_Thickness.*obj(i).Height(1:end-1);
 m_stiff=obj(i).SparWeb_Stiff_N.*Vol_stiff.*2.*obj(i).Mat.rho;
 
 % m = m + m_stiff;
-x = Seg_eta;
-
+X = [X,Seg_eta*(Etas(i+1)-Etas(i))+Etas(i)];
+M = [M,m];
 end
 

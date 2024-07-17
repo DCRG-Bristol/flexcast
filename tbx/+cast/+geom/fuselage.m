@@ -11,7 +11,7 @@ function [fuselage,Ls] = fuselage(L_cabin,D_cabin,opts)
         L_cabin (1,1) double {mustBeNumeric} % cabin length in meters
         D_cabin (1,1) double {mustBeNumeric} % cabin diameter in meters
         opts.L_cp (1,1) double {mustBeNumeric} = 4 % cockpit length in meters
-        opts.L_tail = D_cabin*1.4966 % tail length in meters
+        opts.L_tail = D_cabin*1.6733 % tail length in meters
         opts.IsDraggable = true % make fuselage contribute to Drag
     end
     L_f = L_cabin + opts.L_cp + opts.L_tail;  % fuselage length

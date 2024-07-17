@@ -35,7 +35,9 @@ classdef Decent < cast.mission.Segment
             VCAS = ads.util.calibrated_airspeed(obj.Mach,P,P_s,a_s,1.4);
             TAS = ads.util.true_airspeed(obj.Mach,a,T,T_s);
             % if no CAS defined assume CAS at cruise
-            if isnan(obj.CAS)
+            if isempty(obj.CAS)
+                obj.CAS = VCAS(end);
+            elseif isnan(obj.CAS)
                 obj.CAS = VCAS(end);
             end
             % change TAS at alts where velocity is limited by CAS not Mach
