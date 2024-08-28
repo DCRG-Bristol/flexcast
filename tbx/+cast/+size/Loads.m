@@ -104,7 +104,7 @@ classdef Loads
                 obj(i).Fz = [obj(i).Fz;obj2(i).Fz];
                 obj(i).FzIdx = [obj(i).FzIdx;obj2(i).FzIdx];
 
-                obj(i).Meta = farg.struct.concat(obj(i).Meta,obj2(i).Meta);
+                obj(i).Meta = dcrg.struct.concat(obj(i).Meta,obj2(i).Meta);
             end
         end
         function obj = and(obj,obj2)

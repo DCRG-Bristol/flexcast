@@ -42,7 +42,7 @@ classdef Mission
                     obj.Segments(4) = cast.mission.Decent(Alt_c,FL015,M_c,CR020,V_climb);
                     r = obj.Segments(2).distanceEstimate() + obj.Segments(4).distanceEstimate();
                     if r>Range
-                        Alt_c = Alt_c-1000/cast.SI.ft;
+                        Alt_c = Alt_c-250/cast.SI.ft;
                         if Alt_c<0
                             error('Cannot reach cruise altitude with given range')
                         end
@@ -60,7 +60,8 @@ classdef Mission
             obj.Segments(7) = cast.mission.Contingency(FL015,5./cast.SI.min,ADR.V_app/a_a); % Reserve fuel
             %% alternate fuel
             Alt_alternate = ADR.Alt_alternate;
-            if ADR.Range_alternate==0 
+            Range_alternate = min(ADR.Range_alternate,Range);
+            if Range_alternate==0 
                 obj.Segments(8) = cast.mission.Nothing();
                 obj.Segments(9) = cast.mission.Nothing();
                 obj.Segments(10) = cast.mission.Nothing();
@@ -70,10 +71,10 @@ classdef Mission
                 obj.Segments(8) = cast.mission.Climb(FL015,Alt_alternate,M_c,CR015,V_climb);
                 obj.Segments(10) = cast.mission.Decent(Alt_alternate,FL015,M_c,CR020,V_climb);
                 r = obj.Segments(8).distanceEstimate() + obj.Segments(10).distanceEstimate();
-                if r>ADR.Range_alternate
-                    Alt_alternate = Alt_alternate-1000/cast.SI.ft;
+                if r>Range_alternate
+                    Alt_alternate = Alt_alternate-250/cast.SI.ft;
                 else
-                    obj.Segments(9) = cast.mission.Cruise(Alt_alternate,ADR.Range_alternate-r,ADR.M_c);
+                    obj.Segments(9) = cast.mission.Cruise(Alt_alternate,Range_alternate-r,ADR.M_c);
                     break
                 end
             end
