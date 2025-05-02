@@ -29,14 +29,14 @@ Iyy_sparcap_= lcw.*t_cap.^3/12 + lcw.*t_cap.*(0.5*h).^2 + t_cap.*lch.^3/12 + t_c
 Iyy_sparcap=Iyy_sparcap_*4;
 
 % web
-Iyy_web_=t_web.*h.^3/12;
+Iyy_web_=t_web.*(h-t_skin*2).^3/12;
 
 Iyy_web=Iyy_web_*2;
 
 % skin-stringer panel 
 
 % skin
-Iyy_skin=w.*t_skin.^3/12 + w.*t_skin.*(0.5*h).^2;
+Iyy_skin=w.*t_skin.^3/12 + w.*t_skin.*(h-t_skin).^2/4;
 
 % stringer
 seg1=ba.*ta.^3/12 + ba.*ta.*(0.5*h).^2;
