@@ -1,4 +1,4 @@
-function [Par,BinFolder,Lds,isError,indicator] = Sizing(obj,Cases,opts)
+function [Par,BinFolder,Lds,isError,indicator] = StructuralSizing(obj,Cases,opts)
 arguments
     obj
     Cases (:,1) cast.LoadCase % Load Cases to run
@@ -30,8 +30,7 @@ for n = 1:opts.WingboxMaxStep+1
     obj.WingBoxParams = Par{n};
     %get loads for each case
     
-    [Lds,BinFolder] = obj.GetLoads(Cases,"CleanUp",opts.CleanUp,...
-        "BinFolder",opts.BinFolder,"Verbose",opts.Verbose,"Silent",opts.Silent);
+    [Lds] = obj.LoadsSurrogate.GetLoads(Cases);
     %size aircraft
     Par{n+1} = obj.WingBoxParams.Size(Lds.max(),1,"Verbose",opts.Verbose,"Converge",0.05);
     %add check if slow to converge

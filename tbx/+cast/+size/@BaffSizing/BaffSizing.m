@@ -1,14 +1,17 @@
-classdef BaseSizing < handle
-    %BASESIZING Summary of this class goes here
+classdef BaffSizing < handle
+    %AircraftSizing Summary of this class goes here
     %   Detailed explanation goes here
     
     properties
         %baff model
         Baff baff.Model = baff.Model.empty;
-        fe ads.fe.Component = ads.fe.Component.empty;
         WingBoxParams cast.size.WingBoxSizing = cast.size.WingBoxSizing.empty;
         Name = '';
         RibPitch = 0.6;
+
+        LoadsSurrogate cast.size.AbstractLoads = cast.size.NullLoads.empty;
+
+
     end
 
     properties(Abstract)
