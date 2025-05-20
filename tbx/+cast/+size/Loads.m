@@ -280,6 +280,7 @@ classdef Loads
                 opts.Norm = nan; % index of row to normalise data with
                 opts.Xidx = nan;
                 opts.XScale = 1;
+                opts.Flip = false(1,numel(obj))
                 %                 opts.PlotSeperators logical = true
             end
             Spans = [Params.Span];
@@ -296,6 +297,9 @@ classdef Loads
                     Xidx = 1:length(Params(i).Eta);
                 else
                     Xidx = opts.Xidx;
+                end
+                if opts.Flip(i)
+                    Xidx = fliplr(Xidx);
                 end
                 if ~opts.PlotIdx
                     data = obj(i).(load).*opts.XScale;
