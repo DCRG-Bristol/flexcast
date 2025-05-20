@@ -6,7 +6,6 @@ classdef ADP < handle
     end
     %geometry
     properties
-        SweepAngle
         Span;
         WingArea;
         Thrust;
