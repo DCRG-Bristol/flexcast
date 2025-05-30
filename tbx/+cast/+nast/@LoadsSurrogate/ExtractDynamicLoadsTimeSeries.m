@@ -25,6 +25,7 @@ for i = 1:length(tags)
         tmp_lds.Fx = F_n(data(j).BeamForce,'Fx');
         tmp_lds.Fy = F_n(data(j).BeamForce,'Fy');
         tmp_lds.Fz = F_n(data(j).BeamForce,'Fz');
+        tmp_lds.t = data(j).t;
         if j == 1
             lds = tmp_lds;
         else

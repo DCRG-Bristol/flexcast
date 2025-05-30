@@ -11,6 +11,8 @@ classdef Loads
         Fz
         IDs
 
+        t % time for dyanmic loads
+
         % Name of critical load case
         MxIdx
         MyIdx
