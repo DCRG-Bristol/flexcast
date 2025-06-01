@@ -7,7 +7,7 @@ end
 Par = obj;
 %SIZE Summary of this function goes here
 %   Detailed explanation goes here
-sigma_Y=Par.Mat.Yield;
+sigma_Y=Par.Mat.yield;
 shear_strength = sigma_Y/sqrt(3);
 %Update loads with safety factor
 My = abs(SafetyFactor * Loads.My);
@@ -91,7 +91,7 @@ t_skin(t_skin<skin_min_thick) = skin_min_thick;
 N=t_skin.*sigma_psi;
 Fe=2000*(N./L_inch).^0.5;
 be_t = -7.743e-6*(Fe/1000).^4 + 0.0006387*(Fe/1000).^3 + 0.007084*(Fe/1000).^2 - 1.966*(Fe/1000) + 76.83;
-idx = Fe > convpres(1,'pa','psi')*Par.Mat.Yield;
+idx = Fe > convpres(1,'pa','psi')*Par.Mat.yield;
 if any(idx)
     warning('Load intensity Exceeded on Skin - setting be_t to 10...');
     be_t(idx) = 10;
@@ -141,7 +141,7 @@ te_rib = interp1(Par.Eta,Par.Skin.Skin_Thickness,Par.Ribs.Eta)*1.5;
 N_crush=My_rib./(h_rib.*w_rib);
 Sigma_Crush=2*N_crush.^2./(Par.Mat.E*te_rib.*h_rib);
 F_crush=Par.Ribs.ActualPitch*Sigma_Crush.*w_rib;
-t_y=F_crush./(w_rib*Par.Mat.Yield); % critical thickness for yielding 
+t_y=F_crush./(w_rib*Par.Mat.yield); % critical thickness for yielding 
 A=pi^2*Par.Mat.E/12; % critical thickness for wide column buckling
 c=1;
 t_cb=(F_crush.*(h_rib./sqrt(c)).^2./(A*w_rib)).^(1/3);

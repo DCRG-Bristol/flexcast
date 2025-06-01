@@ -18,18 +18,18 @@ classdef ADP < handle
         V_VT; % Vertical tail volume
     end
 
-    properties(Dependent)
+    properties
         AR
     end
 
-    methods
-        function value = get.AR(obj)
-            value = obj.Span^2/obj.WingArea;
-        end
-        function set.AR(obj, value)
-            obj.Span = sqrt(obj.WingArea*value);
-        end
-    end
+    % methods
+        % function value = get.AR(obj)
+        %     value = obj.Span^2/obj.WingArea;
+        % end
+        % function set.AR(obj, value)
+        %     obj.Span = sqrt(obj.WingArea*value);
+        % end
+    % end
     %Aerodynamic
     properties
         Cl_max = 1.5;   % airfoil amx Cl for wing

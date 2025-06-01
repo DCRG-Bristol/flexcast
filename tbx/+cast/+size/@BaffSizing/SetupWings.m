@@ -11,7 +11,9 @@ for i = 1:length(obj.Tags)
     idx = find(idx,1);
     wing = obj.Baff.Wing(idx);
     mat = ads.fe.Material.FromBaffMat(wing.Stations(1).Mat);
-    mat.Yield = 5.0e8;
+    if isnan(mat.yield)
+        error('Wingbox material must specifiy a yield stress')
+    end
     % setup the param object
     %get locus length and norm positions 
     [lenLocus,kappa] = wing.Stations.GetLocus();
