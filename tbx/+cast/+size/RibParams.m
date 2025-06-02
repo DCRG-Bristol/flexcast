@@ -15,7 +15,7 @@ classdef RibParams
         function obj = RibParams(Span,Pitch)
             obj.IdealPitch = Pitch;
             obj.Span = Span;
-            obj.NumEl = round(Span/Pitch)+1;
+            obj.NumEl = max(round(Span/Pitch)+1,2);
             obj.ActualPitch = Span/(obj.NumEl-1);
             obj.Eta = linspace(0,1,obj.NumEl);
             obj.Thickness = ones(1,obj.NumEl) * 0.01;
