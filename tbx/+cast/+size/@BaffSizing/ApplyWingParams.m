@@ -18,12 +18,11 @@ for i = 1:length(obj.WingBoxParams)
     SecMass = Masses.Web_stiff_total + Masses.Fixtures;
     for j = obj.WingBoxParams(i).Index
         tmp_wing = obj.Baff.Wing(j);
-        % assign cross-section properties
-        for k = 1:length(tmp_wing.Stations)
-            tmp_wing.Stations(k).A = Area.cross_section(k);
-            tmp_wing.Stations(k).I = diag([Iyy(k)+Izz(k),Iyy(k),Izz(k)]);
-            tmp_wing.Stations(k).J = J(k);
-        end
+        tmp_wing.Stations.A = Area.cross_section;
+        tmp_wing.Stations.I(1,1,:) = Iyy+Izz;
+        tmp_wing.Stations.I(2,2,:) = Iyy;
+        tmp_wing.Stations.I(3,3,:) = Izz;
+        tmp_wing.Stations.J = J;
         % assign Additional masses
         idx = find(contains([tmp_wing.Children.Name],"ribs_"));
         for k = 1:length(idx)
