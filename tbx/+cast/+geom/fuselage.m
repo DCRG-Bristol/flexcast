@@ -21,26 +21,24 @@ function [fuselage,Ls] = fuselage(L_cabin,D_cabin,opts)
 
     % make cockpit object
     cockpit = baff.BluffBody.SemiSphere(x_c,D_cabin/2);
-    [cockpit.Stations.EtaDir] = deal([1;0;tand(4)]);
+    cockpit.Stations.EtaDir = [1;0;tand(4)];
     % make cabin object
     cabin = baff.BluffBody.Cylinder(x_tail-x_c,D_cabin/2);
     % make tail object
     tail = baff.BluffBody.SemiSphere(L_f-x_tail,D_cabin/2,"Inverted",true,"EtaFrustrum",0.05);
     % tweak tail so top of fuselage in straight line
-    for i = 1:(length(tail.Stations)-1)
-        dEta = tail.Stations(i+1).Eta - tail.Stations(i).Eta;
-        dRadius = tail.Stations(i).Radius - tail.Stations(i+1).Radius;
-        tail.Stations(i).EtaDir = [1;0;dRadius./dEta./tail.EtaLength];
-    end
+    dEta = diff(tail.Stations.Eta);
+    dRadius = -diff(tail.Stations.Radius);
+    L = tail.EtaLength;
+    tail.Stations.EtaDir = [repmat([1;0],1,tail.Stations.N);...
+        [dRadius./dEta./L,0]];
 
-    % conbine into a fuselage
+    % combine into a fuselage
     fuselage = cockpit + cabin + tail;
     fuselage.Name = "fuselage";
     fuselage.A = baff.util.rotz(180);
-    for i = 1:length(fuselage.Stations)
-        fuselage.Stations(i).EtaDir(1) = -fuselage.Stations(i).EtaDir(1);
-        fuselage.Stations(i).StationDir = [0;0;1];
-    end
+    fuselage.Stations.EtaDir(1,:) = -fuselage.Stations.EtaDir(1,:);
+    fuselage.Stations.StationDir = [0;0;1];
     % make fuselage contribute to Drag
     if opts.IsDraggable
         fuselage = cast.drag.DraggableBluffBody(fuselage);

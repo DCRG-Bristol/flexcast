@@ -10,7 +10,7 @@ for i = 1:length(obj.Tags)
     end
     idx = find(idx,1);
     wing = obj.Baff.Wing(idx);
-    mat = ads.fe.Material.FromBaffMat(wing.Stations(1).Mat);
+    mat = ads.fe.Material.FromBaffMat(wing.Stations.Mat(1));
     if isnan(mat.yield)
         error('Wingbox material must specifiy a yield stress')
     end
@@ -26,14 +26,15 @@ for i = 1:length(obj.Tags)
     end
     obj.WingBoxParams(i).Index = idx;
     % get wingbox height and width
-    aero_stations = wing.AeroStations.interpolate([wing.Stations.Eta]);
+    aero_stations = wing.AeroStations.interpolate(wing.Stations.Eta);
     % wingbox height mean of spar heights
-    obj.WingBoxParams(i).Height = [aero_stations.ThicknessRatio].*[aero_stations.Chord];
-    for j = 1:length(aero_stations)
-       obj.WingBoxParams(i).Height(j) = obj.WingBoxParams(i).Height(j)* mean(interp1(aero_stations(j).Airfoil.Etas',aero_stations(j).Airfoil.Ys(:,1)',[0.15 0.65])*2);
+    obj.WingBoxParams(i).Height = aero_stations.ThicknessRatio.*aero_stations.Chord;
+    for j = 1:aero_stations.N
+        airfoil = aero_stations.Airfoil(j);
+       obj.WingBoxParams(i).Height(j) = obj.WingBoxParams(i).Height(j)* mean(interp1(airfoil.Etas',airfoil.Ys(:,1)',[0.15 0.65])*2);
     end
 %     obj.WingBoxParams(i).Height = [aero_stations.ThicknessRatio].*[aero_stations.Chord];
-    obj.WingBoxParams(i).Width = [aero_stations.Chord].*(0.65-0.15);
+    obj.WingBoxParams(i).Width = aero_stations.Chord.*(0.65-0.15);
     %setup distributed mass for ribs
     wing.DistributeMass(1,obj.WingBoxParams(i).Ribs.NumEl,"tag","ribs_1","Method","Regular");
     %setup dependent wings
@@ -44,7 +45,7 @@ for i = 1:length(obj.Tags)
         end
         idx = find(idx,1);
         wing = obj.Baff.Wing(idx);
-        if length([wing.Stations]) ~= obj.WingBoxParams(i).NumEl
+        if wing.Stations.N ~= obj.WingBoxParams(i).NumEl
             error('Wing %s does not have the same number of elements as wing %s',obj.Tags{i}(j),obj.Tags{i}(1));
         end
         obj.WingBoxParams(i).Index = [obj.WingBoxParams(i).Index,idx];
