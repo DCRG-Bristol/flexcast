@@ -3,11 +3,9 @@ arguments
     obj
     Cases (:,1) cast.LoadCase % Load Cases to run
 end
-ads.Log.debug('Calculating Nastran Loads');
+ads.Log.debug('Calculating Nastran Loads','Mid');
 for i = 1:length(Cases)
-    if ~opts.Silent
-        ads.Log.debug(sprintf('Running Case %s',Cases(i).Name));
-    end
+    ads.Log.debug(sprintf('Running Case %s',Cases(i).Name),'low');
     cellArgs = namedargs2cell(Cases(i).ConfigParams);
     obj.SetConfiguration(cellArgs{:});
     if ~ismethod(obj,Cases(i).Type)
