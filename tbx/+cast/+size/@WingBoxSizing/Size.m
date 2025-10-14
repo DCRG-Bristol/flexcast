@@ -10,16 +10,16 @@ end
 if length(obj) ~= length(Loads)
     error('Loads and WingBoxSizing objects must have same size')
 end
-ads.Log.debug('Sizing Wingboxes');
+ads.Log.trace('Sizing Wingboxes','mid');
 for i = 1:length(obj)
     clear Par
     Par(1) = obj(i);
     for k = 1:opts.MaxStep
         Par(k+1) = Par(k).SizeStep(Loads(i),SafetyFactor);
         indicator = Par(k) == Par(k+1);
-        ads.Log.trace(sprintf('Sizing Wingbox %.0f, Substep %.0f, Max. Percentage Change %.2f',i,k,indicator*100))
+        ads.Log.trace(sprintf('Sizing Wingbox %.0f, Substep %.0f, Max. Percentage Change %.2f',i,k,indicator*100),'low');
         if indicator*100 < opts.Converge
-            ads.Log.trace('Wingbox Sizing Complete!');
+            ads.Log.trace(sprintf('Wingbox %.0f Sizing Complete!',i),'mid');
             break
         else
             if k == opts.MaxStep

@@ -25,7 +25,7 @@ for n = 1:opts.WingboxMaxStep+1
         end
     end
 
-    ads.Log.trace(sprintf('Wingbox Sizing %s, Step %.0f',obj.Name,n));
+    ads.Log.trace(sprintf('Structural Sizing %s, Step %.0f',obj.Name,n),'high');
     obj.WingBoxParams = Par{n};
     %get loads for each case
     
@@ -39,13 +39,13 @@ for n = 1:opts.WingboxMaxStep+1
     % check for convergence
     indicator = Par{n} == Par{n+1};
     
-    ads.Log.trace(sprintf('Wingbox Sizing step %.0f Complete, Total Percentage Change %.2f',n,indicator*100));
+    ads.Log.trace(sprintf('Wingbox Sizing step %.0f Complete, Total Percentage Change %.2f',n,indicator*100),'high');
     
 end
 Par = Par{end};
 obj.WingBoxParams = Par;
 
-ads.Log.debug(sprintf('Wingbox Sizing %s Complete!',obj.Name),Length=60);
+ads.Log.debug(sprintf('Structural Sizing of %s Complete!',obj.Name),Length=60);
 
 end
 

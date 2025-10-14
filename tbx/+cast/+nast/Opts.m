@@ -6,7 +6,6 @@ classdef Opts
         CleanUp = true;
         BinFolder = '';
         Verbose = false;
-        Silent = false;
     end
     methods
         function obj = Opts(opts)
@@ -17,15 +16,13 @@ classdef Opts
                 opts.CleanUp = true;
                 opts.BinFolder = '';
                 opts.Verbose = false;
-                opts.Silent = false;
             end
             obj.WingboxMaxStep = opts.WingboxMaxStep;
             obj.WingboxConvergence = opts.WingboxConvergence;
             obj.NGoldenSection = opts.NGoldenSection;
             obj.CleanUp = opts.CleanUp;
             obj.BinFolder = opts.BinFolder;
-            obj.Verbose = opts.Verbose;
-            obj.Silent = opts.Silent;            
+            obj.Verbose = opts.Verbose;         
         end
     end
 end
