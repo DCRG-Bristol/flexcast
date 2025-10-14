@@ -33,8 +33,15 @@ for i = 1:length(obj.Tags)
         airfoil = aero_stations.Airfoil(j);
        obj.WingBoxParams(i).Height(j) = obj.WingBoxParams(i).Height(j)* mean(interp1(airfoil.Etas',airfoil.Ys(:,1)',[0.15 0.65])*2);
     end
-%     obj.WingBoxParams(i).Height = [aero_stations.ThicknessRatio].*[aero_stations.Chord];
-    obj.WingBoxParams(i).Width = aero_stations.Chord.*(0.65-0.15);
+    
+    % correction factor for sweep
+    sDir = wing.Stations.StationDir;
+    sDir = sDir./vecnorm(sDir);
+    eDir = wing.Stations.EtaDir;
+    eDir = eDir./vecnorm(eDir);
+    f = vecnorm(cross(eDir,sDir)); % cos(sweep)
+
+    obj.WingBoxParams(i).Width = aero_stations.Chord.*(0.65-0.15).*f;
     %setup distributed mass for ribs
     wing.DistributeMass(1,obj.WingBoxParams(i).Ribs.NumEl,"tag","ribs_1","Method","Regular");
     %setup dependent wings
