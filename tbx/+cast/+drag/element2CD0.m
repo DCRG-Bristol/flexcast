@@ -8,7 +8,7 @@ function [meta] = element2CD0(ele,S_ref,alt,Mach,opts)
         opts.pLamWing = 0.1;
         opts.pWingMaxThickness = 0.5;
     end
-    [rho,a,~,~,nu] = ads.util.atmos(alt);
+    [rho,a,~,~,nu] = dcrg.aero.atmos(alt);
     switch class(ele)   
         case 'cast.drag.DraggableBluffBody'
             D = max([ele.Stations.Radius])*2;

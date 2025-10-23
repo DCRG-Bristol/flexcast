@@ -36,7 +36,7 @@ function [fuselage,Ls] = fuselage(L_cabin,D_cabin,opts)
     % combine into a fuselage
     fuselage = cockpit + cabin + tail;
     fuselage.Name = "fuselage";
-    fuselage.A = baff.util.rotz(180);
+    fuselage.A = dcrg.rotzd(180);
     fuselage.Stations.EtaDir(1,:) = -fuselage.Stations.EtaDir(1,:);
     fuselage.Stations.StationDir = [0;0;1];
     % make fuselage contribute to Drag

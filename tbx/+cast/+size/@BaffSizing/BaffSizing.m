@@ -9,9 +9,7 @@ classdef BaffSizing < handle
         Name = '';
         RibPitch = 0.6;
 
-        LoadsSurrogate cast.size.AbstractLoads = cast.size.NullLoads.empty;
-
-
+        LoadsSurrogate cast.size.AbstractLoads = cast.size.NullLoads;
     end
 
     properties(Abstract)

@@ -26,11 +26,11 @@ classdef Climb < cast.mission.Segment
             obj.CAS = CAS;
         end
         function [alt,M,TAS] = ClimbProperties(obj);
-            alt = unique([obj.StartAlt:500/cast.SI.ft:obj.EndAlt,obj.EndAlt]);
-            [rho,a,T,P,~,~,~] = ads.util.atmos(alt);
-            [rho_s,a_s,T_s,P_s,~,~,~] = ads.util.atmos(0);
-            VCAS = ads.util.calibrated_airspeed(obj.Mach,P,P_s,a_s,1.4);
-            TAS = ads.util.true_airspeed(obj.Mach,a,T,T_s);
+            alt = unique([obj.StartAlt:500/SI.ft:obj.EndAlt,obj.EndAlt]);
+            [rho,a,T,P,~,~,~] = dcrg.aero.atmos(alt);
+            [rho_s,a_s,T_s,P_s,~,~,~] = dcrg.aero.atmos(0);
+            VCAS = dcrg.aero.v.calibrated(obj.Mach,P,P_s,a_s,1.4);
+            TAS = dcrg.aero.v.true(obj.Mach,a,T,T_s);
             % if no CAS defined assume CAS at cruise
             if isempty(obj.CAS) 
                 obj.CAS = VCAS(end);
@@ -39,7 +39,7 @@ classdef Climb < cast.mission.Segment
             end
             % change TAS at alts where velocity is limited by CAS not Mach
             idx = VCAS>=obj.CAS; 
-            TAS(idx) = ads.util.equivelent_true_airspeed(P(idx),rho(idx),P_s,rho_s,1.4,obj.CAS);
+            TAS(idx) = dcrg.aero.v.equivelent(P(idx),rho(idx),P_s,rho_s,1.4,obj.CAS);
             M = TAS./a;
         end
         function [r,t] = distanceEstimate(obj)

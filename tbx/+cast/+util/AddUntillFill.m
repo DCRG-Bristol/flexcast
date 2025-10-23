@@ -1,4 +1,6 @@
 function vals = AddUntillFill(vals,gap)
+% add points to vals by bisecting the largest gap uptill the
+% maximum gap is less than 'gap'
     delta = vals(2:end)-vals(1:end-1);
     [md,idx] = max(abs(delta));
     while md>gap
@@ -7,4 +9,4 @@ function vals = AddUntillFill(vals,gap)
         delta = vals(2:end)-vals(1:end-1);
         [md,idx] = max(abs(delta));
     end
-    end
+end
