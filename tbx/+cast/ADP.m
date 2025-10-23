@@ -1,18 +1,18 @@
-classdef ADP < handle
+classdef (Abstract) ADP < handle
     %ADP Aircraft Design Parameters
+    properties (Abstract)
+        Engine cast.config.AbstractEngine
+        Polar cast.aero.AbstractPolar
+    end
     properties
         ADR cast.ADR; % Aircraft Design Requirements
-        FuelType = cast.config.Fuel.JA1;
+        FuelType cast.config.Fuel = cast.config.Fuel.JA1;
     end
     %geometry
     properties
         Span;
         WingArea;
         Thrust;
-        KinkEta = 0.3;
-        EngineEta = 0.3;
-        WingEta = 0.5;
-        WingletHeight = 2.4;
 
         V_HT; % Horizontal Tail Volume
         V_VT; % Vertical tail volume
@@ -22,15 +22,6 @@ classdef ADP < handle
         AR
     end
 
-    % methods
-        % function value = get.AR(obj)
-        %     value = obj.Span^2/obj.WingArea;
-        % end
-        % function set.AR(obj, value)
-        %     obj.Span = sqrt(obj.WingArea*value);
-        % end
-    % end
-    %Aerodynamic
     properties
         Cl_max = 1.5;   % airfoil amx Cl for wing
         
@@ -49,9 +40,9 @@ classdef ADP < handle
         LD_app = 10;
 
         CD0 =0.02;
-        e = 0.8; %Oswald Efficency Factor
 
-        TWgr =0; %thrust to weight ratio on ground run 
+        e = 0.8; % Oswald Efficency Factor
+        TWgr = 0; % thrust to weight ratio on ground run 
     end
     %mass
     properties
@@ -64,10 +55,6 @@ classdef ADP < handle
     end
     %engine initial guess
     properties
-        SFC_0; % specific fuel consumption on ground
-        SFC_app; % specific fuel consumption on ground
-        SFC_c; % SFC cruise
-        N_eng = 2;
         TW_idle = 0.02;
     end
     

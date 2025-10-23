@@ -27,7 +27,7 @@ function val = bounded_gd(res,hunt_step,max_step)
         % if that guess is outside/too close to boundary, then use golden section search
         b_delta = bounds(2) - bounds(1);
         if val < bounds(1)+b_delta*0.05 || val > bounds(2)-b_delta*0.05
-            val = ads.util.tern(abs(deltas(2))<abs(deltas(1)),bounds(1)+b_delta*0.618,bounds(1)+b_delta*0.382);
+            val = bounds(1) + b_delta*dcrg.tern(abs(deltas(2))<abs(deltas(1)),0.618,0.382);
         end
     end
 end

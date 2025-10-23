@@ -53,19 +53,19 @@ classdef Meta
         function m = PrintInfo(obj)
             m = [];
             m(1) = obj.PAX;
-            m(end+1) = obj.Range_Design.*cast.SI.Nmile;
-            m(end+1) = obj.Range_harm.*cast.SI.Nmile;
-            m(end+1) = obj.Range_asym.*cast.SI.Nmile;
-            m(end+1) = obj.Range_ferry.*cast.SI.Nmile;
-            m(end+1) = obj.MTOM.*cast.SI.Tonne;
-            % m(end+1) = obj.OEM.*cast.SI.Tonne;
-            m(end+1) = obj.Payload.*cast.SI.Tonne;
-            m(end+1) = obj.Payload_asym.*cast.SI.Tonne;
-            m(end+1) = obj.MZFM.*cast.SI.Tonne;
-            m(end+1) = obj.MLND.*cast.SI.Tonne;
-            m(end+1) = obj.Fuel_capacity.*cast.SI.Tonne;
-            m(end+1) = obj.Fuel_block.*cast.SI.Tonne;
-            m(end+1) = obj.Fuel_trip.*cast.SI.Tonne;
+            m(end+1) = obj.Range_Design.*SI.Nmile;
+            m(end+1) = obj.Range_harm.*SI.Nmile;
+            m(end+1) = obj.Range_asym.*SI.Nmile;
+            m(end+1) = obj.Range_ferry.*SI.Nmile;
+            m(end+1) = obj.MTOM.*SI.Tonne;
+            % m(end+1) = obj.OEM.*SI.Tonne;
+            m(end+1) = obj.Payload.*SI.Tonne;
+            m(end+1) = obj.Payload_asym.*SI.Tonne;
+            m(end+1) = obj.MZFM.*SI.Tonne;
+            m(end+1) = obj.MLND.*SI.Tonne;
+            m(end+1) = obj.Fuel_capacity.*SI.Tonne;
+            m(end+1) = obj.Fuel_block.*SI.Tonne;
+            m(end+1) = obj.Fuel_trip.*SI.Tonne;
             m(end+1) = obj.WingArea;
             m(end+1) = obj.Span;
             m(end+1) = obj.AspectRatio;
@@ -77,7 +77,7 @@ classdef Meta
             m(end+1) = obj.CL_c;
             m(end+1) = obj.LD_c;
             m(end+1) = obj.e;
-            m(end+1) = obj.CD0.*cast.SI.DragCount;
+            m(end+1) = obj.CD0.*SI.DragCount;
             num2clip(m');
         end
         function m = PrintNames(obj)
