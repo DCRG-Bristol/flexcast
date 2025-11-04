@@ -14,7 +14,8 @@ function [EWF,fs,ts] = FuelFraction(ADP,Segments,opts)
         switch class(s)
             case 'cast.mission.GroundOp'
                 if isempty(ADP.Thrust)
-                    error('Please set a MaxThrust value in the Thrust Property')
+                    warning('Please set a MaxThrust value in the Thrust Property')
+                    ADP.Thrust = ADP.MTOM*SI.g*0.31;
                 end
                 TW = ADP.Thrust/(ADP.MTOM*SI.g);
                 f = 1 - ADP.Engine.TSFC(0,0)*9.81*(s.TaxiTime*ADP.TW_idle + s.TakeOffTime*TW);  % Snorri Eq. 6-32 (p.155)
