@@ -80,9 +80,7 @@ classdef Mission
             end
         end
         obj.Segments(11) = cast.mission.Loiter(FL015,ADR.Loiter,ADR.V_app/a_a); % Reserve fuel
-        obj.Segments(12) = cast.mission.Decent(FL015,0,ADR.V_app/a_a,0.03*ADR.V_app); % Land (3% gradient)
-            %% reserve fuel
-            
+        obj.Segments(12) = cast.mission.Decent(FL015,0,ADR.V_app/a_a,0.03*ADR.V_app); % Land (3% gradient)            
         end
     end
 end

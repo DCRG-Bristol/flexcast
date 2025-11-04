@@ -25,7 +25,7 @@ function [L,D] = cabin(PAX,opts)
         delta_d = 0.46;
     else
         % A320 like
-        k_cabin = 0.7456;
+        k_cabin = 0.7643;
         delta_d = 0.48;
     end
 
