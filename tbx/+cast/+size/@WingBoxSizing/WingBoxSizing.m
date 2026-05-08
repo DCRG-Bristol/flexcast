@@ -17,6 +17,9 @@ classdef WingBoxSizing
         Height
         Width
 
+        %spar adjusted properties
+        mod_SparWeb_Thickness = @(x) 0;
+
         % Material
         Mat ads.fe.Material
 

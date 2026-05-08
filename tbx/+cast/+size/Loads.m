@@ -9,9 +9,8 @@ classdef Loads
         Fx
         Fy
         Fz
+        t
         IDs
-
-        t % time for dyanmic loads
 
         % Name of critical load case
         MxIdx
@@ -106,7 +105,7 @@ classdef Loads
                 obj(i).Fz = [obj(i).Fz;obj2(i).Fz];
                 obj(i).FzIdx = [obj(i).FzIdx;obj2(i).FzIdx];
 
-                obj(i).Meta = dcrg.struct.concat(obj(i).Meta,obj2(i).Meta);
+                obj(i).Meta = farg.struct.concat(obj(i).Meta,obj2(i).Meta);
             end
         end
         function obj = and(obj,obj2)
@@ -282,7 +281,6 @@ classdef Loads
                 opts.Norm = nan; % index of row to normalise data with
                 opts.Xidx = nan;
                 opts.XScale = 1;
-                opts.Flip = false(1,numel(obj))
                 %                 opts.PlotSeperators logical = true
             end
             Spans = [Params.Span];
@@ -299,9 +297,6 @@ classdef Loads
                     Xidx = 1:length(Params(i).Eta);
                 else
                     Xidx = opts.Xidx;
-                end
-                if opts.Flip(i)
-                    Xidx = fliplr(Xidx);
                 end
                 if ~opts.PlotIdx
                     data = obj(i).(load).*opts.XScale;

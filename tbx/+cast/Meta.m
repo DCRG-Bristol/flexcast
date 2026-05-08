@@ -58,7 +58,7 @@ classdef Meta
             m(end+1) = obj.Range_asym.*cast.SI.Nmile;
             m(end+1) = obj.Range_ferry.*cast.SI.Nmile;
             m(end+1) = obj.MTOM.*cast.SI.Tonne;
-            % m(end+1) = obj.OEM.*cast.SI.Tonne;
+            m(end+1) = obj.OEM.*cast.SI.Tonne;
             m(end+1) = obj.Payload.*cast.SI.Tonne;
             m(end+1) = obj.Payload_asym.*cast.SI.Tonne;
             m(end+1) = obj.MZFM.*cast.SI.Tonne;
@@ -87,7 +87,7 @@ classdef Meta
             m(end+1) = "Asym. Range [nm]";
             m(end+1) = "Ferry Range [nm]";
             m(end+1) = "MTOM [tn]";
-            % m(end+1) = "OEM [tn]";
+            m(end+1) = "OEM [tn]";
             m(end+1) = "Payload [tn]";
             m(end+1) = "Payload Asym. [tn]";
             m(end+1) = "MZFM [tn]";

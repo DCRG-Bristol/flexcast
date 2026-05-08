@@ -15,8 +15,10 @@ classdef SkinParams
         StrgThickness_Ground
         StrgThickness_Web
         StrgThickness_Flange
-        
 
+        %skin adjusted properties
+        mod_Skin_Thickness = @(x) 0;
+        
         %minimium values
         Skin_Min_Thickness = 0.5e-3;
         Strg_Min_Thickness = 0.5e-3;

@@ -6,6 +6,7 @@ lcw=obj.CapEta_width*w; % spar cap top length
 lch=obj.CapEta_height*h; % spar cap web length
 t_cap=obj.SparCap_Thickness;
 t_web=obj.SparWeb_Thickness;
+
 % skin-stringer panel params
 % Note stringer pitch is assumed to be equal to the effective width of the ss panel.
 % Hence be=b.
@@ -22,7 +23,6 @@ tf=obj.Skin.StrgThickness_Flange;
 
 Strg_Area=ba.*ta + bf.*tf + bw.*tw;
 Num_strg=round(w./be);
-
 %% calc area
 Area_cap=(lcw + lch).*t_cap;
 Area_skin=w.*t_skin;

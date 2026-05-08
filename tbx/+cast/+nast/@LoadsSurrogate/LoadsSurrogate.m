@@ -9,6 +9,7 @@ classdef LoadsSurrogate < cast.size.AbstractLoads
 
     properties
         CleanUp logical = true
+        Silent logical = true
         BinFolder string = "";
         Verbose logical = false;
 

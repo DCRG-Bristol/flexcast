@@ -58,5 +58,9 @@ Mass(i).Fixtures = Mass(i).Total * 0.00;
 
 Mass(i).Total = Mass(i).Total + Mass(i).Fixtures;
 
+%de-bug
+Mass.Volume = A;
+Mass.Volume.Seg_len = Seg_len;
+
 end
 

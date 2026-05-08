@@ -1,14 +1,15 @@
-function Par = SizeStep(obj,Loads,SafetyFactor)
+function Par = SizeStep(obj,Loads,SafetyFactor,opts)
 arguments
     obj cast.size.WingBoxSizing
     Loads
     SafetyFactor
+    opts.optiSizing = false;
 end
 Par = obj;
 %SIZE Summary of this function goes here
 %   Detailed explanation goes here
 sigma_Y=Par.Mat.yield;
-shear_strength = sigma_Y/sqrt(3);
+shear_strength = sigma_Y/sqrt(3); % Von Mises criterion
 %Update loads with safety factor
 My = abs(SafetyFactor * Loads.My);
 Mx = abs(SafetyFactor * Loads.Mx);
@@ -32,8 +33,7 @@ Cap_Thickness=max([Cap_Thickness_Y;Cap_Thickness_B]);
 Cap_Thickness(Cap_Thickness<Par.Spar_Min_Thickness) = Par.Spar_Min_Thickness;
 Par.SparCap_Thickness=Cap_Thickness; 
 % update Iyy prediction
-Iyy = Par.Iyy; 
-
+Iyy= Par.Iyy; 
 %% Spar Web Sizing     
 % check bending stress on the top web
 Bending_Stress=My.*(0.5*h)./Iyy;
@@ -44,7 +44,7 @@ Q_spar = ws.*Cap_Thickness.*(0.5*h)*2;
 Q_web = (0.5*tsw.*h.*(0.25*h))*2;
 Q = Q_skn + Q_spar + Q_web;
 
-Shear_stress = Fz.*Q./(2*Iyy.*tsw) + Mx./(2*h.*w.*tsw);
+Shear_stress = Fz.*Q./(2*Iyy.*tsw) + Mx./(2*h.*w.*tsw); %bending +torsion
 
 % web critical buckling stresses (bending)
 Sigma_buckling_web=21*Par.Mat.E*(tsw./h).^2;
@@ -63,10 +63,14 @@ Constraint_web3=Shear_stress./Sigma_buckling_shear;
 %         Constraint_web=max([Constraint_web1'; Constraint_web2'; Constraint_web3']);
 Constraint_web=max([Constraint_web1; Constraint_web3]);
 
+% Par.Constraint_web = Constraint_web;
+
 % update spar web thickness
 SparWeb_adjust=step_size(Constraint_web);
-
-Par.SparWeb_Thickness=Par.SparWeb_Thickness.*SparWeb_adjust;
+SparWeb_Thickness_Constraint=Par.Spar_Min_Thickness.*max(Par.mod_SparWeb_Thickness(-Par.Eta),0);
+if opts.optiSizing
+Par.SparWeb_Thickness = Par.SparWeb_Thickness.*SparWeb_adjust + SparWeb_Thickness_Constraint;
+end
 Par.SparWeb_Thickness(Par.SparWeb_Thickness<Par.Spar_Min_Thickness) = Par.Spar_Min_Thickness;
 % update beam properties
 Iyy = Par.Iyy;  
@@ -101,8 +105,9 @@ end
 be=be_t.*t_skin;                            % skin-stringer panel effective width (inch)
 b=be;                                       % stringer pitch = effective width (inch)
 ta=0.7*t_skin;                              % ground thickness (inch)
-ba=ta*9.35;                                 % ground width (inch)
+% ba=ta*9.35;                               % ground width (inch)
 A_st=0.5*b.*t_skin;                         % stringer area (inch^2)
+ba = (0.40 * A_st) ./ (2 * ta);             % Calculate maximum allowable width (e.g. flanges can't be > 40% of total area)
 bw=(be_t.*((A_st-2.*ba.*ta)./1.327)).^0.5;  % stringer depth (inch)
 tw=bw./be_t;                                % stringer web thickness (inch)    
 bf=0.327*bw;                                % stringer flange width (inch)
@@ -121,6 +126,11 @@ Par.Skin.StrgThickness_Flange=tf*0.0254;
 
 %ensure minimium skin thicknesses
 skin_min_thick = Par.Skin.Skin_Min_Thickness;
+
+Skin_Thickness_Constraint=skin_min_thick.*max(Par.Skin.mod_Skin_Thickness(-Par.Eta),0);
+if opts.optiSizing
+Par.Skin.Skin_Thickness=Par.Skin.Skin_Thickness+Skin_Thickness_Constraint;
+end
 Par.Skin.Skin_Thickness(Par.Skin.Skin_Thickness<skin_min_thick) = skin_min_thick;
 
 %ensure minimium Stringer thickness
@@ -134,6 +144,7 @@ Par.Skin.StrgThickness_Ground(Par.Skin.StrgThickness_Ground<strg_min_thick) = st
 My_rib = interp1(Par.Eta,My,Par.Ribs.Eta);
 w_rib = interp1(Par.Eta,Par.Width,Par.Ribs.Eta);
 h_rib = interp1(Par.Eta,Par.Height,Par.Ribs.Eta);
+
 % factor 1.5 applied as the ratio between A_st/A_skn=0.5; Hence effective
 % thickness of the panel is taken as 1.5 times t_skin.
 te_rib = interp1(Par.Eta,Par.Skin.Skin_Thickness,Par.Ribs.Eta)*1.5;
