@@ -5,6 +5,7 @@ classdef WingBoxSizing
     properties
         NumEl
         Eta
+        GlobalEtaRange;
         Span
 
         %spar properties
@@ -18,7 +19,8 @@ classdef WingBoxSizing
         Width
 
         %spar adjusted properties
-        mod_SparWeb_Thickness = @(x) 0;
+        mod_SparWeb_Thickness = @(x) 0*x;
+        %skin defined within another SkinParams class
 
         % Material
         Mat ads.fe.Material
@@ -31,6 +33,7 @@ classdef WingBoxSizing
 
         %minValues
         Spar_Min_Thickness = 1e-3;
+        %skin defined within another SkinParams class
 
         Index = 0;
         Name string = "";
@@ -116,7 +119,25 @@ classdef WingBoxSizing
             obj.Ribs = obj.Ribs.apply(params.Ribs);
             obj.Skin = obj.Skin.apply(params.Skin);
         end
-
+        function new_obj = copy(obj)
+            % Independent shadow copy of the WingBoxSizing object.
+            %
+            % Class hierarchy assumptions (verified May 2025):
+            %   - WingBoxSizing : value class
+            %   - SkinParams    : value class  → deep-copied automatically
+            %   - RibParams     : value class  → deep-copied automatically
+            %   - Material      : HANDLE class → reference shared INTENTIONALLY
+            %                     (read-only during sizing, no mutation expected)
+            %
+            % If Material ever needs deep-copying, add it here:
+            %   if ~isempty(obj.Mat) && isa(obj.Mat,'handle') && ismethod(obj.Mat,'copy')
+            %       new_obj.Mat = copy(obj.Mat);
+            %   end
+            %
+            % Use this in any code where shadow objects must be guaranteed independent:
+            %   Par_s = Par.copy();
+                new_obj = obj;
+        end
         function new_obj = interpolate(obj,etas)
             % return a new WingBoxSizing object with interpolated values
             arguments

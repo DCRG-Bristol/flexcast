@@ -29,11 +29,12 @@ for n = 1:opts.WingboxMaxStep+1
     end
     obj.WingBoxParams = Par{n};
     %get loads for each case
-    
     [Lds,BinFolder] = obj.GetLoads(Cases,"CleanUp",opts.CleanUp,...
         "BinFolder",opts.BinFolder,"Verbose",opts.Verbose,"Silent",opts.Silent);
-    %size aircraft
+
+    %re-size wingbox
     Par{n+1} = obj.WingBoxParams.Size(Lds.max(),1,"Verbose",opts.Verbose,"Converge",0.05);
+    
     %add check if slow to converge
     if (n>5 &&  (Par{n+1} == Par{n})>0.05) || n>opts.NGoldenSection
         Par{n+1} = Par{n} + (Par{n+1} - Par{n}).*0.382;
@@ -43,9 +44,13 @@ for n = 1:opts.WingboxMaxStep+1
     if ~opts.Silent
         ads.util.printing.title(sprintf('Sizing step %.0f Complete, Total Percentage Change %.2f',n,indicator*100),Length=60,Symbol='~');
     end
+
 end
 Par = Par{end};
 obj.WingBoxParams = Par;
+
+% -TODO -- add in flexcast the ability to apply the wingbox params!
+% obj.ApplyWingParams
 
 if ~opts.Silent
     ads.util.printing.title(sprintf('Sizing %s Complete!',obj.Name),Length=60);

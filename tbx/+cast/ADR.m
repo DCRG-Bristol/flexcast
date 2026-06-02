@@ -13,6 +13,8 @@ classdef ADR
         GroundRun
         GroundRunLanding
         M_c % cruise Mach number
+        M_dive % dive Mach number
+        M_maxOp % maximum operating Mach number
         Alt_max % max altitude in m
         Alt_cruise
     end
@@ -37,11 +39,13 @@ classdef ADR
             obj = cast.ADR();
             obj.PAX = PAX;
             obj.Range = Range./cast.SI.Nmile;% m (from nautical miles)
-            obj.GroundRun = 2100; %m
-            obj.GroundRunLanding = 1500; %m
+            obj.GroundRun = 2180; %m
+            obj.GroundRunLanding = 1440; %m
             obj.M_c = 0.78;
+            obj.M_dive = 0.89;
+            obj.M_maxOp = 0.82;
             obj.Alt_max = 39e3./cast.SI.ft; %m (39,000ft)
-            obj.Alt_cruise = 31e3./cast.SI.ft;
+            obj.Alt_cruise = 37e3./cast.SI.ft;
             obj.Crew = 2 + ceil(PAX/50);
             if ~isnan(TargetPayload)
                 obj.Payload = TargetPayload;
@@ -54,8 +58,8 @@ classdef ADR
                 obj.ExtraPayload = 0;
             end
             obj.CrewMass = (80+10)*obj.Crew;
-            obj.V_app = 100;
-            obj.V_climb = 290/cast.SI.knt;
+            obj.V_app = 134/cast.SI.knt; % approach speed in m/s (134 knots)
+            obj.V_climb = 290/cast.SI.knt; % CLIMB speed in m/s (290 knots)
         end
     end
 end

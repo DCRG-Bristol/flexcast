@@ -77,6 +77,21 @@ classdef Engine
             f = 1./(cast.SI.lb/(cast.SI.lbf*cast.SI.hr)); % to convert SFC from imperial to SI.
             obj = cast.config.Engine(107e3,2.422,2.00,2331,0.3316*f,0.596*f,6);
         end
+
+        function obj = CFM_LEAP_1A26(sfc_scaling,alt_cruise,M_cruise)
+            arguments
+                sfc_scaling = 1;
+                alt_cruise = 32e3 ./ cast.SI.ft
+                M_cruise = 0.78
+            end
+            %CFM_LEAP_1A26 SData for CFM LEAP-1A
+            %   https://www.easa.europa.eu/en/downloads/20086/en
+            f = 1./(cast.SI.lb/(cast.SI.lbf*cast.SI.hr)) * sfc_scaling; % to convert SFC from imperial to SI.
+            BPR = 11;
+            SFC_T0 = 19*exp(-0.12*BPR)*1e-6 * sfc_scaling; % from Aircraft Design: A Conceptual Approach, Raymer, 5th Ed. eq.10.7
+            SFC_cruise = 25*exp(-0.05*BPR)*1e-6 * sfc_scaling; % from Aircraft Design: A Conceptual Approach, Raymer, 5th Ed. eq.10.9 (very close to value on wikipedia)
+            obj = cast.config.Engine(120640,3.328,2.533,3008,SFC_T0,SFC_cruise,BPR,alt_cruise,M_cruise);
+        end
     end
 end
 

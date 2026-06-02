@@ -17,7 +17,7 @@ classdef SkinParams
         StrgThickness_Flange
 
         %skin adjusted properties
-        mod_Skin_Thickness = @(x) 0;
+        mod_Skin_Thickness = @(x) 0*x;
         
         %minimium values
         Skin_Min_Thickness = 0.5e-3;
