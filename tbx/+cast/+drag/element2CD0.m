@@ -12,10 +12,10 @@ function [meta] = element2CD0(ele,S_ref,alt,Mach,opts)
     switch class(ele)   
         case 'cast.drag.DraggableBluffBody'
             D = max([ele.Stations.Radius])*2;
-            f = ele.EtaLength/D;
             cLen = ele.EtaLength;
+            f = cLen/D;
             R = rho*Mach*a*cLen/nu;
-            R_cutoff = 44.62*(ele.EtaLength/(0.634e-5))^1.053*Mach^1.16;
+            R_cutoff = 44.62*(cLen/(0.634e-5))^1.053*Mach^1.16;
             Cf = GetCf(R,R_cutoff,Mach,opts.pLamFuselage);
             Q = ele.InterferanceFactor;
             if contains(ele.Name,'fuselage','IgnoreCase',true)
