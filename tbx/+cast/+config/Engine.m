@@ -69,7 +69,7 @@ classdef Engine < cast.config.AbstractEngine
             BPR = 11;
             SFC_T0 = 19*exp(-0.12*BPR)*1e-6 * sfc_scaling; % from Aircraft Design: A Conceptual Approach, Raymer, 5th Ed. eq.10.7
             SFC_cruise = 25*exp(-0.05*BPR)*1e-6 * sfc_scaling; % from Aircraft Design: A Conceptual Approach, Raymer, 5th Ed. eq.10.9 (very close to value on wikipedia)
-            obj = cast.config.Engine(143050,3.328,2.4,3008,SFC_T0,SFC_cruise,BPR,alt_cruise,M_cruise);
+            obj = cast.config.Engine(143050,3.65,2.6,3008,SFC_T0,SFC_cruise,BPR,alt_cruise,M_cruise);
         end
         function obj = CFM56_5()
             %CFM56_5 Data for CFM56-5 as on a318/a319
