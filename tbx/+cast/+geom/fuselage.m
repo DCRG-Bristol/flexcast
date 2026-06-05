@@ -25,7 +25,8 @@ function [fuselage,Ls] = fuselage(L_cabin,D_cabin,opts)
     % make cabin object
     cabin = baff.BluffBody.Cylinder(x_tail-x_c,D_cabin/2);
     % make tail object
-    tail = baff.BluffBody.SemiSphere(L_f-x_tail,D_cabin/2,"Inverted",true,"EtaFrustrum",0.05);
+    tail = baff.BluffBody.Cone(L_f-x_tail,D_cabin/2,D_cabin/2*0.1);
+    % tail = baff.BluffBody.SemiSphere(L_f-x_tail,D_cabin/2,"Inverted",true,"EtaFrustrum",0.05);
     % tweak tail so top of fuselage in straight line
     dEta = diff(tail.Stations.Eta);
     dRadius = diff(tail.Stations.Radius);
