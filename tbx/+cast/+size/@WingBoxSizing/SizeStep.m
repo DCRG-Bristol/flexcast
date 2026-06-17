@@ -74,24 +74,24 @@ Iyy = Par.Iyy;
 %% skin-stringer panel sizing
 %effective length (inches)
 c=1.5;
-L_inch = convlength(Par.Ribs.IdealPitch/sqrt(c),'m','in'); 
+L_inch = Par.Ribs.IdealPitch/sqrt(c) * SI.inch;
 
 %bending stress (psi)
-sigma_psi=convpres(0.5*My.*h./Iyy,'pa','psi');
+sigma_psi=0.5*My.*h./Iyy * SI.psi;
 
 % calculating skin thickness
 % Note factor of 1.5 applied as the area ratio Ast/Askin=0.5;
 % Total force act on the skin-stringer panel = sigma * (Ask+ 0.5*Askin)
 t_skin=sigma_psi.*L_inch./(3000^2);
 %ensure minimium skin thicknesses
-skin_min_thick = convlength(Par.Skin.Skin_Min_Thickness,'m','in'); 
+skin_min_thick = Par.Skin.Skin_Min_Thickness * SI.inch;
 t_skin(t_skin<skin_min_thick) = skin_min_thick;
 
 % N load intensity (load per unit lenth)
 N=t_skin.*sigma_psi;
 Fe=2000*(N./L_inch).^0.5;
 be_t = -7.743e-6*(Fe/1000).^4 + 0.0006387*(Fe/1000).^3 + 0.007084*(Fe/1000).^2 - 1.966*(Fe/1000) + 76.83;
-idx = Fe > convpres(1,'pa','psi')*Par.Mat.yield;
+idx = Fe > (1*SI.psi)*Par.Mat.yield;
 if any(idx)
     warning('Load intensity Exceeded on Skin - setting be_t to 10...');
     be_t(idx) = 10;

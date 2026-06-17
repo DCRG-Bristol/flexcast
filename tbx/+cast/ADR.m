@@ -23,9 +23,9 @@ classdef ADR
 
     % alternate airport diversion properties
     properties
-        Alt_alternate = 22e3./cast.SI.ft;
-        Range_alternate = 200./cast.SI.Nmile;
-        Loiter = 30./cast.SI.min; % 30 minutes in seconds
+        Alt_alternate = 22e3./SI.ft;
+        Range_alternate = 200./SI.Nmile;
+        Loiter = 30./SI.min; % 30 minutes in seconds
     end
     methods(Static)
         function obj = A320(PAX,Range,TargetPayload)
@@ -36,12 +36,12 @@ classdef ADR
             end
             obj = cast.ADR();
             obj.PAX = PAX;
-            obj.Range = Range./cast.SI.Nmile;% m (from nautical miles)
+            obj.Range = Range./SI.Nmile;% m (from nautical miles)
             obj.GroundRun = 2100; %m
             obj.GroundRunLanding = 1500; %m
             obj.M_c = 0.78;
-            obj.Alt_max = 39e3./cast.SI.ft; %m (39,000ft)
-            obj.Alt_cruise = 31e3./cast.SI.ft;
+            obj.Alt_max = 39e3./SI.ft; %m (39,000ft)
+            obj.Alt_cruise = 31e3./SI.ft;
             obj.Crew = 2 + ceil(PAX/50);
             if ~isnan(TargetPayload)
                 obj.Payload = TargetPayload;
@@ -55,7 +55,7 @@ classdef ADR
             end
             obj.CrewMass = (80+10)*obj.Crew;
             obj.V_app = 100;
-            obj.V_climb = 290/cast.SI.knt;
+            obj.V_climb = 290/SI.knt;
         end
     end
 end

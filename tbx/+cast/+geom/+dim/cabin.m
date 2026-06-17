@@ -14,7 +14,7 @@ function [L,D] = cabin(PAX,opts)
     else
         N_sr = opts.N_sr;
     end
-    N_a = ads.util.tern(N_sr>6,2,1);   % number of aisles
+    N_a = dcrg.tern(N_sr>6,2,1);   % number of aisles
     N_arm = N_sr+1+N_a;                 % number of armrests
     Nr = ceil(PAX/N_sr);                % number of rows
 
@@ -25,12 +25,12 @@ function [L,D] = cabin(PAX,opts)
         delta_d = 0.46;
     else
         % A320 like
-        k_cabin = 0.7456;
+        k_cabin = 0.7643;
         delta_d = 0.48;
     end
 
     % calculate cabin length and diameter
     L = Nr*k_cabin;
     % constants from a320 charteristics
-    D = (N_sr*18 + N_arm*1.5 + N_a*19)./cast.SI.inch + delta_d; % fuselage diameter
+    D = (N_sr*18 + N_arm*1.5 + N_a*19)./SI.inch + delta_d; % fuselage diameter
 end

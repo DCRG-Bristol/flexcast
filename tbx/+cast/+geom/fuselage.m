@@ -11,7 +11,7 @@ function [fuselage,Ls] = fuselage(L_cabin,D_cabin,opts)
         L_cabin (1,1) double {mustBeNumeric} % cabin length in meters
         D_cabin (1,1) double {mustBeNumeric} % cabin diameter in meters
         opts.L_cp (1,1) double {mustBeNumeric} = 4 % cockpit length in meters
-        opts.L_tail = D_cabin*1.6733 % tail length in meters
+        opts.L_tail = D_cabin*2.48 % tail length in meters
         opts.IsDraggable = true % make fuselage contribute to Drag
     end
     L_f = L_cabin + opts.L_cp + opts.L_tail;  % fuselage length
@@ -21,14 +21,15 @@ function [fuselage,Ls] = fuselage(L_cabin,D_cabin,opts)
 
     % make cockpit object
     cockpit = baff.BluffBody.SemiSphere(x_c,D_cabin/2);
-    cockpit.Stations.EtaDir = [1;0;tand(4)];
+    cockpit.Stations.EtaDir = [1;0;-tand(4)];
     % make cabin object
     cabin = baff.BluffBody.Cylinder(x_tail-x_c,D_cabin/2);
     % make tail object
-    tail = baff.BluffBody.SemiSphere(L_f-x_tail,D_cabin/2,"Inverted",true,"EtaFrustrum",0.05);
+    tail = baff.BluffBody.Cone(L_f-x_tail,D_cabin/2,D_cabin/2*0.1);
+    % tail = baff.BluffBody.SemiSphere(L_f-x_tail,D_cabin/2,"Inverted",true,"EtaFrustrum",0.05);
     % tweak tail so top of fuselage in straight line
     dEta = diff(tail.Stations.Eta);
-    dRadius = -diff(tail.Stations.Radius);
+    dRadius = diff(tail.Stations.Radius);
     L = tail.EtaLength;
     tail.Stations.EtaDir = [repmat([1;0],1,tail.Stations.N);...
         [dRadius./dEta./L,0]];
@@ -36,7 +37,7 @@ function [fuselage,Ls] = fuselage(L_cabin,D_cabin,opts)
     % combine into a fuselage
     fuselage = cockpit + cabin + tail;
     fuselage.Name = "fuselage";
-    fuselage.A = baff.util.rotz(180);
+    fuselage.A = eye(3); % BODY FRAME
     fuselage.Stations.EtaDir(1,:) = -fuselage.Stations.EtaDir(1,:);
     fuselage.Stations.StationDir = [0;0;1];
     % make fuselage contribute to Drag

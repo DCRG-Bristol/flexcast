@@ -16,11 +16,11 @@ classdef Mission
                 ADR
                 Range = ADR.Range;
             end
-            FL015 = 1500./cast.SI.ft;
-            CR015 = 1500./cast.SI.ft.*cast.SI.min; % climb rate of 1500ft/min in SI;
-            CR020 = 2000./cast.SI.ft.*cast.SI.min; % climb rate of 1500ft/min in SI;
+            FL015 = 1500./SI.ft;
+            CR015 = 1500./SI.ft.*SI.min; % climb rate of 1500ft/min in SI;
+            CR020 = 2000./SI.ft.*SI.min; % climb rate of 1500ft/min in SI;
             % approach data
-            [rho_a,a_a,T_a,P_a,nu_a,z_a,sigma_a] = ads.util.atmos(FL015);
+            [rho_a,a_a,T_a,P_a,nu_a,z_a,sigma_a] = dcrg.aero.atmos(FL015);
             % make mission profile
             obj = cast.Mission();
             %% trip fuel
@@ -42,7 +42,7 @@ classdef Mission
                     obj.Segments(4) = cast.mission.Decent(Alt_c,FL015,M_c,CR020,V_climb);
                     r = obj.Segments(2).distanceEstimate() + obj.Segments(4).distanceEstimate();
                     if r>Range
-                        Alt_c = Alt_c-250/cast.SI.ft;
+                        Alt_c = Alt_c-250/SI.ft;
                         if Alt_c<0
                             error('Cannot reach cruise altitude with given range')
                         end
@@ -57,7 +57,7 @@ classdef Mission
             end
 
             %% contingency fuel
-            obj.Segments(7) = cast.mission.Contingency(FL015,5./cast.SI.min,ADR.V_app/a_a); % Reserve fuel
+            obj.Segments(7) = cast.mission.Contingency(FL015,5./SI.min,ADR.V_app/a_a); % Reserve fuel
             %% alternate fuel
             Alt_alternate = ADR.Alt_alternate;
             Range_alternate = min(ADR.Range_alternate,Range);
@@ -72,7 +72,7 @@ classdef Mission
                 obj.Segments(10) = cast.mission.Decent(Alt_alternate,FL015,M_c,CR020,V_climb);
                 r = obj.Segments(8).distanceEstimate() + obj.Segments(10).distanceEstimate();
                 if r>Range_alternate
-                    Alt_alternate = Alt_alternate-250/cast.SI.ft;
+                    Alt_alternate = Alt_alternate-250/SI.ft;
                 else
                     obj.Segments(9) = cast.mission.Cruise(Alt_alternate,Range_alternate-r,ADR.M_c);
                     break
@@ -80,9 +80,7 @@ classdef Mission
             end
         end
         obj.Segments(11) = cast.mission.Loiter(FL015,ADR.Loiter,ADR.V_app/a_a); % Reserve fuel
-        obj.Segments(12) = cast.mission.Decent(FL015,0,ADR.V_app/a_a,0.03*ADR.V_app); % Land (3% gradient)
-            %% reserve fuel
-            
+        obj.Segments(12) = cast.mission.Decent(FL015,0,ADR.V_app/a_a,0.03*ADR.V_app); % Land (3% gradient)            
         end
     end
 end
