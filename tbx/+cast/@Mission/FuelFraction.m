@@ -1,11 +1,12 @@
-function [EWF,fs,ts] = FuelFraction(ADP,Segments,opts)
+function [EWF,fs,ts] = FuelFraction(obj,ADP,opts)
     arguments
+        obj cast.Mission
         ADP cast.ADP
-        Segments cast.mission.Segment
         opts.M_TO = ADP.MTOM;
         opts.OverideLD = false;
         opts.TW = 0.3;
     end
+    Segments = obj.Segments;
     EWF = 1;   % empty weight fraction
     fs = zeros(1,length(Segments));
     ts = zeros(1,length(Segments));
@@ -15,9 +16,10 @@ function [EWF,fs,ts] = FuelFraction(ADP,Segments,opts)
             case 'cast.mission.GroundOp'
                 if isempty(ADP.Thrust)
                     warning('Please set a MaxThrust value in the Thrust Property')
-                    ADP.Thrust = ADP.MTOM*SI.g*0.31;
+                    TW = ADP.ThrustToWeightRatio;
+                else
+                    TW = ADP.Thrust/(ADP.MTOM*SI.g);
                 end
-                TW = ADP.Thrust/(ADP.MTOM*SI.g);
                 f = 1 - ADP.Engine.TSFC(0,0)*9.81*(s.TaxiTime*ADP.TW_idle + s.TakeOffTime*TW);  % Snorri Eq. 6-32 (p.155)
                 t = s.TaxiTime + s.TakeOffTime;
             case 'cast.mission.Climb'
